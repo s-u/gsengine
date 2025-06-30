@@ -1,0 +1,167 @@
+---
+title: "Using gs.engine(): Genstat Socket Engine"
+author: "Yuxiao Wang"
+date: "`r Sys.Date()`"
+output: 
+  rmarkdown::html_vignette:
+  toc: true
+  fig_caption: true
+vignette: >
+  %\VignetteIndexEntry{Using gs.engine(): Genstat Socket Engine}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{css, echo = FALSE}
+img {
+    max-width: 50%;  
+    height: auto; 
+}
+```
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+
+library(gsengine)
+knitr::knit_engines$set(gs = gsengine::gs.engine())
+```
+
+
+
+# Overview
+This vignette demonstrates how to use the gs.engine function provided by the gsengine package to run Genstat code chunks from within an R Markdown document.
+
+It assumes a Genstat server is already running and accessible over a socket connection.
+
+
+
+# Setting up the connection
+You can configure the Genstat server host and port via environment variables:
+```{r}
+Sys.setenv(GENSTAT_HOST = "localhost")
+Sys.setenv(GENSTAT_PORT = "8085")
+```
+
+
+
+# Writing Genstat chunks
+To **run Genstat code** in your R Markdown file, specify the chunk engine as 'gs':
+
+    {gs}
+
+Example:
+```{gs}
+VARIATE [VALUES=1,2,3] Foo
+```
+
+```{gs}
+PRINT Foo
+```
+This code will be sent to the Genstat server, and any output will be captured and rendered in the final document.
+
+
+
+# Echo-only Code Blocks
+
+1) If you want to display the Genstat code **without evaluating** it(eval=FALSE):
+    
+    {gs, eval=FALSE}
+  
+    Example:
+    
+    ```{gs, eval=FALSE}
+    PRINT 'This should not run.'
+    ```
+
+
+2) By default, the 'gs.engine' **does** show the Genstat commands submitted in each chunk.
+
+    To **hide Genstat code lines** in the rendered output, use the 'echo = FALSE' option in the chunk header: 
+    
+    {gs, echo=FALSE}
+  
+    Example:
+    ```{gs, echo=FALSE}
+    PRINT 'This should run.'
+    ```
+
+    This will only include the Genstat result or tables in the final document output.
+
+    This setting behaves similarly to R Markdown’s native echo = TRUE option for R code chunks.
+
+
+
+# Displaying Genstat Graphics
+If Genstat outputs a **PNG image**, it will be displayed directly in the output document. These images are saved locally with filenames like 'img_1.png', 'img_2.png', etc.
+
+Example:
+```{gs}
+DGRAPH !(1,2,3,4,5); !(10,15,7,20,12)
+```
+
+
+
+# Warning and Table Formatting
+The 'gs.engine' will automatically:
+
+1) **Highlight Genstat warnings/Faults** in red.
+
+2) **Format complex tables** (like factors/variates) as Markdown tables.
+
+3) **Format simple tables** (like value/rank summaries) as well-structured Markdown tables.
+
+4) **Recognize and format structural markers** in Genstat output for better readability:
+  
+    -Section breaks such as 1., 2., or 3.1 are rendered as Markdown section dividers:---
+
+    -Headings indicated by === (equal signs under a line) will be converted into bold headings.
+
+    -Subheadings indicated by --- (hyphens under a line) will be converted into italicized subheadings.
+
+    Example:
+```{gs, store_complex_tables=TRUE, store_simple_tables=TRUE}
+IMPORT '%DATA%/WheatTrials.xlsx'; SHEET='Trial A1'
+TREATMENTS Cultivar
+BLOCKS Rep
+ANOVA [FPROB=yes; PSE=LSD] Mean_Population_m2
+AMCOMPARISON Cultivar
+ANOVA [FPROB=yes; PSE=LSD] Yield_14%_t_ha_adj
+AMCOMPARISON Cultivar
+```
+
+
+You can enable **table storage** by setting options in the chunk header:
+
+    {gs, store_complex_tables=TRUE, store_simple_tables=TRUE}
+  
+Tables will be available as lists in global variables:
+  
+    complex_tables_all_chunks
+  
+    simple_tables_all_chunks
+  
+Example:
+```{r}
+complex_tables_all_chunks
+simple_tables_all_chunks
+```
+
+
+
+# Troubleshooting
+If you experience connection issues:
+
+1. Ensure your Genstat socket server is running and listening on the correct port.
+
+2. Test using 'telnet <host> <port>' or similar tools.
+
+
+
+# Session Info
+```{r}
+sessionInfo()
+```
+

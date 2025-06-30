@@ -1,0 +1,2327 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Yuxiao Wang" />
+
+<meta name="date" content="2025-05-15" />
+
+<title>Using gs.engine(): Genstat Socket Engine</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+
+
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Using gs.engine(): Genstat Socket
+Engine</h1>
+<h4 class="author">Yuxiao Wang</h4>
+<h4 class="date">2025-05-15</h4>
+
+
+
+<style type="text/css">
+img {
+max-width: 50%; height: auto; }
+</style>
+<div id="overview" class="section level1">
+<h1>Overview</h1>
+<p>This vignette demonstrates how to use the gs.engine function provided
+by the gsengine package to run Genstat code chunks from within an R
+Markdown document.</p>
+<p>It assumes a Genstat server is already running and accessible over a
+socket connection.</p>
+</div>
+<div id="setting-up-the-connection" class="section level1">
+<h1>Setting up the connection</h1>
+<p>You can configure the Genstat server host and port via environment
+variables:</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">Sys.setenv</span>(<span class="at">GENSTAT_HOST =</span> <span class="st">&quot;localhost&quot;</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="fu">Sys.setenv</span>(<span class="at">GENSTAT_PORT =</span> <span class="st">&quot;8085&quot;</span>)</span></code></pre></div>
+<p>Alternatively, you can pass them directly to ‘gs.engine()’:</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>knitr<span class="sc">::</span>knit_engines<span class="sc">$</span><span class="fu">set</span>(<span class="at">gs =</span> gsengine<span class="sc">::</span><span class="fu">gs.engine</span>(<span class="at">host =</span> <span class="st">&quot;localhost&quot;</span>, <span class="at">port =</span> <span class="dv">8085</span>))</span></code></pre></div>
+</div>
+<div id="writing-genstat-chunks" class="section level1">
+<h1>Writing Genstat chunks</h1>
+<p>To <strong>run Genstat code</strong> in your R Markdown file, specify
+the chunk engine as ‘gs’:</p>
+<p>Example:</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode gs"><code class="sourceCode glsl"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>VARIATE <span class="op">[</span>VALUES<span class="op">=</span><span class="dv">1</span><span class="op">,</span><span class="dv">2</span><span class="op">,</span><span class="dv">3</span><span class="op">]</span> Foo</span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode gs"><code class="sourceCode glsl"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>PRINT Foo</span></code></pre></div>
+<pre><code>     Foo
+   1.000
+   2.000
+   3.000</code></pre>
+<p>This code will be sent to the Genstat server, and any output will be
+captured and rendered in the final document.</p>
+</div>
+<div id="warning-and-table-formatting" class="section level1">
+<h1>Warning and Table Formatting</h1>
+<p>The ‘gs.engine’ will automatically:</p>
+<ol style="list-style-type: decimal">
+<li><p><strong>Highlight Genstat warnings/Faults</strong> in
+red.</p></li>
+<li><p><strong>Format complex tables</strong> (like factors/variates) as
+Markdown tables.</p></li>
+<li><p><strong>Format simple tables</strong> (like value/rank summaries)
+as well-structured Markdown tables.</p></li>
+<li><p><strong>Recognize and format structural markers</strong> in
+Genstat output for better readability: -Section breaks such as 1., 2.,
+or 3.1 are rendered as Markdown section dividers:—</p></li>
+</ol>
+<p>-Headings indicated by === (equal signs under a line) will be
+converted into bold headings.</p>
+<p>-Subheadings indicated by — (hyphens under a line) will be converted
+into italicized subheadings.</p>
+<p>Example:</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode gs"><code class="sourceCode glsl"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>FOR Sheet <span class="op">=</span> &#39;Trial A1&#39;<span class="op">,</span>&#39;Trial A2&#39;<span class="op">,</span>&#39;Trial A3&#39;<span class="op">,</span>&#39;Trial A4&#39;</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a>    IMPORT &#39;<span class="op">%</span>DATA<span class="op">%/</span>WheatTrials<span class="op">.</span><span class="fu">xlsx</span>&#39;<span class="op">;</span> SHEET<span class="op">=</span>Sheet<span class="op">;</span> ISAVE<span class="op">=</span>pData</span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a>    FOR Y <span class="op">=</span> Mean_Population_m2<span class="op">,</span>Harvest_Moisture<span class="op">,</span>Yield_14<span class="op">%</span>_t_ha_adj</span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a>        TREATMENTS Cultivar</span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>        BLOCKS Rep</span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a>        ANOVA <span class="op">[</span>FPROB<span class="op">=</span>yes<span class="op">;</span> PSE<span class="op">=</span>LSD<span class="op">]</span> Y</span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a>        AMCOMPARISON Cultivar</span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a>    ENDFOR</span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a>ENDFOR</span></code></pre></div>
+<p><em><em>Loading Spreadsheet File</em></em></p>
+<p>Catalogue of file WheatTrials.xlsx</p>
+<p>Sheet Title: Trial A1 Description: Data read from D:.xlsx [Trial
+A1]A2:N53 Sheet Type: vector Index Type Nval Name</p>
+<table>
+<thead>
+<tr class="header">
+<th>Index</th>
+<th>Type</th>
+<th>Nval</th>
+<th>Name</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>factor</td>
+<td>52</td>
+<td>Entry</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>factor</td>
+<td>52</td>
+<td>Plot</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>factor</td>
+<td>52</td>
+<td>Row</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td>factor</td>
+<td>52</td>
+<td>Column</td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td>factor</td>
+<td>52</td>
+<td>Block</td>
+</tr>
+<tr class="even">
+<td>6</td>
+<td>factor</td>
+<td>52</td>
+<td>Rep</td>
+</tr>
+<tr class="odd">
+<td>7</td>
+<td>factor</td>
+<td>52</td>
+<td>Cultivar</td>
+</tr>
+<tr class="even">
+<td>8</td>
+<td>variate</td>
+<td>52</td>
+<td>Mean_Population_m2</td>
+</tr>
+<tr class="odd">
+<td>9</td>
+<td>variate</td>
+<td>52</td>
+<td>Plot_Size_m2</td>
+</tr>
+<tr class="even">
+<td>10</td>
+<td>variate</td>
+<td>52</td>
+<td>Plot_Yield_kg</td>
+</tr>
+<tr class="odd">
+<td>11</td>
+<td>variate</td>
+<td>52</td>
+<td>Harvest_Moisture</td>
+</tr>
+<tr class="even">
+<td>12</td>
+<td>variate</td>
+<td>52</td>
+<td>Yield_14%_t_ha_adj</td>
+</tr>
+</tbody>
+</table>
+<div style="page-break-after: always;"></div>
+<hr />
+<p><strong>Analysis of variance</strong></p>
+<p>Variate: Mean_Population_m2</p>
+<p>Source of variation d.f. s.s. m.s. v.r. F pr.</p>
+<p>Rep stratum 3 344.2 114.7 0.40</p>
+<p>Rep.<em>Units</em> stratum Cultivar 12 4354.8 362.9 1.26 0.283
+Residual 36 10368.3 288.0</p>
+<p>Total 51 15067.3</p>
+<ul>
+<li>MESSAGE: the following units have large residuals.</li>
+</ul>
+<p>Rep 3 <em>units</em> 8 34.5 s.e. 14.1</p>
+<p><strong>Tables of means</strong></p>
+<p>Variate: Mean_Population_m2</p>
+<p>Grand mean 192.9</p>
+<p>Cultivar Blaze CAW722 Encore Envy Excess Flame Monarch 200.0 191.2
+211.2 196.2 191.2 187.5 198.8</p>
+<p>Cultivar Nelson Resolve Sirus Victor Wanaka WWT1695 181.2 183.8 183.8
+181.2 195.0 206.2</p>
+<p><em><em>Least significant differences of means (5%
+level)</em></em></p>
+<p>Table Cultivar rep. 4 d.f. 36 l.s.d. 24.34</p>
+<p><strong>Fisher’s protected least significant difference
+test</strong></p>
+<p><em><em>Cultivar</em></em></p>
+<p><span style="color:red;">******** Warning 129, code UF 2, statement
+242 in procedure AMCOMPARISON</span> <span style="color:red;">Fisher’s
+protected LSD is not calculated as variance ratio for Cultivar is
+not</span> <span style="color:red;">significant.</span></p>
+<div style="page-break-after: always;"></div>
+<hr />
+<p><strong>Analysis of variance</strong></p>
+<p>Variate: Harvest_Moisture</p>
+<p>Source of variation d.f. s.s. m.s. v.r. F pr.</p>
+<p>Rep stratum 3 0.2113 0.0704 0.68</p>
+<p>Rep.<em>Units</em> stratum Cultivar 12 7.6969 0.6414 6.20 &lt;.001
+Residual 36 3.7262 0.1035</p>
+<p>Total 51 11.6344</p>
+<ul>
+<li>MESSAGE: the following units have large residuals.</li>
+</ul>
+<p>Rep 1 <em>units</em> 12 0.6 s.e. 0.3 Rep 2 <em>units</em> 2 0.6 s.e.
+0.3</p>
+<p><strong>Tables of means</strong></p>
+<p>Variate: Harvest_Moisture</p>
+<p>Grand mean 15.5</p>
+<p>Cultivar Blaze CAW722 Encore Envy Excess Flame Monarch 15.0 15.2 15.1
+14.9 15.5 16.0 16.1</p>
+<p>Cultivar Nelson Resolve Sirus Victor Wanaka WWT1695 15.1 15.6 15.6
+15.8 16.0 15.2</p>
+<p><em><em>Least significant differences of means (5%
+level)</em></em></p>
+<p>Table Cultivar rep. 4 d.f. 36 l.s.d. 0.46</p>
+<p><strong>Fisher’s protected least significant difference
+test</strong></p>
+<p><em><em>Cultivar</em></em></p>
+<pre><code>           Mean</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Item</th>
+<th>Value</th>
+<th>Rank</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Blaze</td>
+<td>15.02</td>
+<td>ab</td>
+</tr>
+<tr class="even">
+<td>Nelson</td>
+<td>15.10</td>
+<td>ab</td>
+</tr>
+<tr class="odd">
+<td>Encore</td>
+<td>15.15</td>
+<td>abc</td>
+</tr>
+<tr class="even">
+<td>CAW722</td>
+<td>15.22</td>
+<td>abcd</td>
+</tr>
+<tr class="odd">
+<td>WWT1695</td>
+<td>15.25</td>
+<td>abcd</td>
+</tr>
+<tr class="even">
+<td>Excess</td>
+<td>15.47</td>
+<td>bcde</td>
+</tr>
+<tr class="odd">
+<td>Sirus</td>
+<td>15.57</td>
+<td>cdef</td>
+</tr>
+<tr class="even">
+<td>Resolve</td>
+<td>15.62</td>
+<td>defg</td>
+</tr>
+<tr class="odd">
+<td>Victor</td>
+<td>15.77</td>
+<td>efg</td>
+</tr>
+<tr class="even">
+<td>Flame</td>
+<td>16.02</td>
+<td>fg</td>
+</tr>
+<tr class="odd">
+<td>Wanaka</td>
+<td>16.02</td>
+<td>fg</td>
+</tr>
+<tr class="even">
+<td>Monarch</td>
+<td>16.07</td>
+<td>g</td>
+</tr>
+</tbody>
+</table>
+<div style="page-break-after: always;"></div>
+<hr />
+<p><strong>Analysis of variance</strong></p>
+<p>Variate: Yield_14%_t_ha_adj</p>
+<p>Source of variation d.f. s.s. m.s. v.r. F pr.</p>
+<p>Rep stratum 3 8.2134 2.7378 4.27</p>
+<p>Rep.<em>Units</em> stratum Cultivar 12 35.2689 2.9391 4.58 &lt;.001
+Residual 36 23.1068 0.6419</p>
+<p>Total 51 66.5891</p>
+<ul>
+<li>MESSAGE: the following units have large residuals.</li>
+</ul>
+<p>Rep 1 <em>units</em> 2 -1.79 s.e. 0.67</p>
+<p><strong>Tables of means</strong></p>
+<p>Variate: Yield_14%_t_ha_adj</p>
+<p>Grand mean 12.45</p>
+<p>Cultivar Blaze CAW722 Encore Envy Excess Flame Monarch 12.23 13.46
+12.42 14.04 10.60 12.62 12.70</p>
+<p>Cultivar Nelson Resolve Sirus Victor Wanaka WWT1695 12.75 12.50 11.32
+12.29 12.07 12.85</p>
+<p><em><em>Least significant differences of means (5%
+level)</em></em></p>
+<p>Table Cultivar rep. 4 d.f. 36 l.s.d. 1.149</p>
+<p><strong>Fisher’s protected least significant difference
+test</strong></p>
+<p><em><em>Cultivar</em></em></p>
+<pre><code>           Mean</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Item</th>
+<th>Value</th>
+<th>Rank</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Excess</td>
+<td>10.60</td>
+<td>a</td>
+</tr>
+<tr class="even">
+<td>Sirus</td>
+<td>11.32</td>
+<td>ab</td>
+</tr>
+<tr class="odd">
+<td>Wanaka</td>
+<td>12.07</td>
+<td>bc</td>
+</tr>
+<tr class="even">
+<td>Blaze</td>
+<td>12.23</td>
+<td>bc</td>
+</tr>
+<tr class="odd">
+<td>Victor</td>
+<td>12.29</td>
+<td>bc</td>
+</tr>
+<tr class="even">
+<td>Encore</td>
+<td>12.42</td>
+<td>bcd</td>
+</tr>
+<tr class="odd">
+<td>Resolve</td>
+<td>12.50</td>
+<td>cd</td>
+</tr>
+<tr class="even">
+<td>Flame</td>
+<td>12.62</td>
+<td>cd</td>
+</tr>
+<tr class="odd">
+<td>Monarch</td>
+<td>12.70</td>
+<td>cd</td>
+</tr>
+<tr class="even">
+<td>Nelson</td>
+<td>12.75</td>
+<td>cd</td>
+</tr>
+<tr class="odd">
+<td>WWT1695</td>
+<td>12.85</td>
+<td>cd</td>
+</tr>
+<tr class="even">
+<td>CAW722</td>
+<td>13.46</td>
+<td>de</td>
+</tr>
+<tr class="odd">
+<td>Envy</td>
+<td>14.04</td>
+<td>e</td>
+</tr>
+</tbody>
+</table>
+<p><em><em>Loading Spreadsheet File</em></em></p>
+<p>Catalogue of file WheatTrials.xlsx</p>
+<p>Sheet Title: Trial A2 Description: Data read from D:.xlsx [Trial
+A2]A2:M65 Sheet Type: vector Index Type Nval Name</p>
+<table>
+<thead>
+<tr class="header">
+<th>Index</th>
+<th>Type</th>
+<th>Nval</th>
+<th>Name</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>factor</td>
+<td>64</td>
+<td>Entry</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>factor</td>
+<td>64</td>
+<td>Plot</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>factor</td>
+<td>64</td>
+<td>Row</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td>factor</td>
+<td>64</td>
+<td>Column</td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td>factor</td>
+<td>64</td>
+<td>Block</td>
+</tr>
+<tr class="even">
+<td>6</td>
+<td>factor</td>
+<td>64</td>
+<td>Rep</td>
+</tr>
+<tr class="odd">
+<td>7</td>
+<td>factor</td>
+<td>64</td>
+<td>Cultivar</td>
+</tr>
+<tr class="even">
+<td>8</td>
+<td>variate</td>
+<td>64</td>
+<td>Mean_Population_m2</td>
+</tr>
+<tr class="odd">
+<td>9</td>
+<td>variate</td>
+<td>64</td>
+<td>Plot_Size_m2</td>
+</tr>
+<tr class="even">
+<td>10</td>
+<td>variate</td>
+<td>64</td>
+<td>Plot_Yield_kg</td>
+</tr>
+<tr class="odd">
+<td>11</td>
+<td>variate</td>
+<td>64</td>
+<td>Harvest_Moisture</td>
+</tr>
+<tr class="even">
+<td>12</td>
+<td>variate</td>
+<td>64</td>
+<td>Yield_14%_t_ha_adj</td>
+</tr>
+</tbody>
+</table>
+<div style="page-break-after: always;"></div>
+<hr />
+<p><strong>Analysis of variance</strong></p>
+<p>Variate: Mean_Population_m2</p>
+<p>Source of variation d.f. s.s. m.s. v.r. F pr.</p>
+<p>Rep stratum 3 943.1 314.4 2.11</p>
+<p>Rep.<em>Units</em> stratum Cultivar 15 7998.6 533.2 3.57 &lt;.001
+Residual 45 6713.9 149.2</p>
+<p>Total 63 15655.6</p>
+<ul>
+<li>MESSAGE: the following units have large residuals.</li>
+</ul>
+<p>Rep 2 <em>units</em> 2 26. s.e. 10.</p>
+<p><strong>Tables of means</strong></p>
+<p>Variate: Mean_Population_m2</p>
+<p>Grand mean 139.</p>
+<p>Cultivar Blaze Brilliant CAW722 CAW733 Encore Envy Excess 113. 137.
+154. 149. 140. 122. 139.</p>
+<p>Cultivar Flame Monarch Nelson Resolve Sirus Victor Wanaka 139. 129.
+146. 126. 143. 142. 140.</p>
+<p>Cultivar WHT951 WWT1695 158. 141.</p>
+<p><em><em>Least significant differences of means (5%
+level)</em></em></p>
+<p>Table Cultivar rep. 4 d.f. 45 l.s.d. 17.4</p>
+<p><strong>Fisher’s protected least significant difference
+test</strong></p>
+<p><em><em>Cultivar</em></em></p>
+<pre><code>             Mean</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Item</th>
+<th>Value</th>
+<th>Rank</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Blaze</td>
+<td>113.3</td>
+<td>a</td>
+</tr>
+<tr class="even">
+<td>Envy</td>
+<td>122.1</td>
+<td>ab</td>
+</tr>
+<tr class="odd">
+<td>Resolve</td>
+<td>126.3</td>
+<td>abc</td>
+</tr>
+<tr class="even">
+<td>Monarch</td>
+<td>129.2</td>
+<td>abcd</td>
+</tr>
+<tr class="odd">
+<td>Brilliant</td>
+<td>136.7</td>
+<td>bcde</td>
+</tr>
+<tr class="even">
+<td>Excess</td>
+<td>139.2</td>
+<td>bcdef</td>
+</tr>
+<tr class="odd">
+<td>Flame</td>
+<td>139.2</td>
+<td>bcdef</td>
+</tr>
+<tr class="even">
+<td>Wanaka</td>
+<td>140.0</td>
+<td>cdef</td>
+</tr>
+<tr class="odd">
+<td>Encore</td>
+<td>140.4</td>
+<td>cdef</td>
+</tr>
+<tr class="even">
+<td>WWT1695</td>
+<td>140.8</td>
+<td>cdef</td>
+</tr>
+<tr class="odd">
+<td>Victor</td>
+<td>142.1</td>
+<td>cdefg</td>
+</tr>
+<tr class="even">
+<td>Sirus</td>
+<td>142.9</td>
+<td>cdefg</td>
+</tr>
+<tr class="odd">
+<td>Nelson</td>
+<td>146.3</td>
+<td>defg</td>
+</tr>
+<tr class="even">
+<td>CAW733</td>
+<td>149.2</td>
+<td>efg</td>
+</tr>
+<tr class="odd">
+<td>CAW722</td>
+<td>154.2</td>
+<td>fg</td>
+</tr>
+<tr class="even">
+<td>WHT951</td>
+<td>158.3</td>
+<td>g</td>
+</tr>
+</tbody>
+</table>
+<div style="page-break-after: always;"></div>
+<hr />
+<p><strong>Analysis of variance</strong></p>
+<p>Variate: Harvest_Moisture</p>
+<p>Source of variation d.f. s.s. m.s. v.r. F pr.</p>
+<p>Rep stratum 3 0.26547 0.08849 4.70</p>
+<p>Rep.<em>Units</em> stratum Cultivar 15 6.08859 0.40591 21.56 &lt;.001
+Residual 45 0.84703 0.01882</p>
+<p>Total 63 7.20109</p>
+<ul>
+<li>MESSAGE: the following units have large residuals.</li>
+</ul>
+<p>Rep 1 <em>units</em> 2 -0.4 s.e. 0.1 Rep 2 <em>units</em> 15 -0.3
+s.e. 0.1</p>
+<p><strong>Tables of means</strong></p>
+<p>Variate: Harvest_Moisture</p>
+<p>Grand mean 13.5</p>
+<p>Cultivar Blaze Brilliant CAW722 CAW733 Encore Envy Excess 13.3 13.1
+13.3 13.8 13.6 13.4 13.5</p>
+<p>Cultivar Flame Monarch Nelson Resolve Sirus Victor Wanaka 13.6 13.2
+13.3 13.5 13.2 13.4 14.5</p>
+<p>Cultivar WHT951 WWT1695 13.4 13.7</p>
+<p><em><em>Least significant differences of means (5%
+level)</em></em></p>
+<p>Table Cultivar rep. 4 d.f. 45 l.s.d. 0.20</p>
+<p><strong>Fisher’s protected least significant difference
+test</strong></p>
+<p><em><em>Cultivar</em></em></p>
+<pre><code>             Mean</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Item</th>
+<th>Value</th>
+<th>Rank</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Brilliant</td>
+<td>13.13</td>
+<td>a</td>
+</tr>
+<tr class="even">
+<td>Monarch</td>
+<td>13.15</td>
+<td>ab</td>
+</tr>
+<tr class="odd">
+<td>Sirus</td>
+<td>13.23</td>
+<td>abc</td>
+</tr>
+<tr class="even">
+<td>CAW722</td>
+<td>13.25</td>
+<td>abcd</td>
+</tr>
+<tr class="odd">
+<td>Nelson</td>
+<td>13.30</td>
+<td>abcde</td>
+</tr>
+<tr class="even">
+<td>Blaze</td>
+<td>13.33</td>
+<td>bcde</td>
+</tr>
+<tr class="odd">
+<td>Victor</td>
+<td>13.35</td>
+<td>cde</td>
+</tr>
+<tr class="even">
+<td>Envy</td>
+<td>13.38</td>
+<td>cdef</td>
+</tr>
+<tr class="odd">
+<td>WHT951</td>
+<td>13.43</td>
+<td>def</td>
+</tr>
+<tr class="even">
+<td>Resolve</td>
+<td>13.45</td>
+<td>ef</td>
+</tr>
+<tr class="odd">
+<td>Excess</td>
+<td>13.48</td>
+<td>ef</td>
+</tr>
+<tr class="even">
+<td>Encore</td>
+<td>13.55</td>
+<td>fg</td>
+</tr>
+<tr class="odd">
+<td>Flame</td>
+<td>13.55</td>
+<td>fg</td>
+</tr>
+<tr class="even">
+<td>WWT1695</td>
+<td>13.73</td>
+<td>gh</td>
+</tr>
+<tr class="odd">
+<td>CAW733</td>
+<td>13.75</td>
+<td>h</td>
+</tr>
+<tr class="even">
+<td>Wanaka</td>
+<td>14.45</td>
+<td>i</td>
+</tr>
+</tbody>
+</table>
+<div style="page-break-after: always;"></div>
+<hr />
+<p><strong>Analysis of variance</strong></p>
+<p>Variate: Yield_14%_t_ha_adj</p>
+<p>Source of variation d.f. s.s. m.s. v.r. F pr.</p>
+<p>Rep stratum 3 0.31345 0.10448 2.05</p>
+<p>Rep.<em>Units</em> stratum Cultivar 15 9.56350 0.63757 12.52 &lt;.001
+Residual 45 2.29135 0.05092</p>
+<p>Total 63 12.16831</p>
+<p><strong>Tables of means</strong></p>
+<p>Variate: Yield_14%_t_ha_adj</p>
+<p>Grand mean 10.70</p>
+<p>Cultivar Blaze Brilliant CAW722 CAW733 Encore Envy Excess 10.73 10.28
+11.05 11.29 10.46 10.60 10.68</p>
+<p>Cultivar Flame Monarch Nelson Resolve Sirus Victor Wanaka 10.55 10.90
+10.62 10.00 10.40 10.62 10.35</p>
+<p>Cultivar WHT951 WWT1695 11.44 11.29</p>
+<p><em><em>Least significant differences of means (5%
+level)</em></em></p>
+<p>Table Cultivar rep. 4 d.f. 45 l.s.d. 0.321</p>
+<p><strong>Fisher’s protected least significant difference
+test</strong></p>
+<p><em><em>Cultivar</em></em></p>
+<pre><code>             Mean</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Item</th>
+<th>Value</th>
+<th>Rank</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Resolve</td>
+<td>10.00</td>
+<td>a</td>
+</tr>
+<tr class="even">
+<td>Brilliant</td>
+<td>10.28</td>
+<td>ab</td>
+</tr>
+<tr class="odd">
+<td>Wanaka</td>
+<td>10.35</td>
+<td>bc</td>
+</tr>
+<tr class="even">
+<td>Sirus</td>
+<td>10.40</td>
+<td>bcd</td>
+</tr>
+<tr class="odd">
+<td>Encore</td>
+<td>10.46</td>
+<td>bcde</td>
+</tr>
+<tr class="even">
+<td>Flame</td>
+<td>10.55</td>
+<td>bcde</td>
+</tr>
+<tr class="odd">
+<td>Envy</td>
+<td>10.60</td>
+<td>bcdef</td>
+</tr>
+<tr class="even">
+<td>Victor</td>
+<td>10.62</td>
+<td>cdef</td>
+</tr>
+<tr class="odd">
+<td>Nelson</td>
+<td>10.62</td>
+<td>cdef</td>
+</tr>
+<tr class="even">
+<td>Excess</td>
+<td>10.68</td>
+<td>def</td>
+</tr>
+<tr class="odd">
+<td>Blaze</td>
+<td>10.73</td>
+<td>efg</td>
+</tr>
+<tr class="even">
+<td>Monarch</td>
+<td>10.90</td>
+<td>fg</td>
+</tr>
+<tr class="odd">
+<td>CAW722</td>
+<td>11.05</td>
+<td>gh</td>
+</tr>
+<tr class="even">
+<td>CAW733</td>
+<td>11.29</td>
+<td>hi</td>
+</tr>
+<tr class="odd">
+<td>WWT1695</td>
+<td>11.29</td>
+<td>hi</td>
+</tr>
+<tr class="even">
+<td>WHT951</td>
+<td>11.44</td>
+<td>i</td>
+</tr>
+</tbody>
+</table>
+<p><em><em>Loading Spreadsheet File</em></em></p>
+<p>Catalogue of file WheatTrials.xlsx</p>
+<p>Sheet Title: Trial A3 Description: Data read from D:.xlsx [Trial
+A3]A2:Y65 Sheet Type: vector Index Type Nval Name</p>
+<table>
+<thead>
+<tr class="header">
+<th>Index</th>
+<th>Type</th>
+<th>Nval</th>
+<th>Name</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>factor</td>
+<td>64</td>
+<td>Entry</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>factor</td>
+<td>64</td>
+<td>Plot</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>factor</td>
+<td>64</td>
+<td>Row</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td>factor</td>
+<td>64</td>
+<td>Column</td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td>factor</td>
+<td>64</td>
+<td>Block</td>
+</tr>
+<tr class="even">
+<td>6</td>
+<td>factor</td>
+<td>64</td>
+<td>Rep</td>
+</tr>
+<tr class="odd">
+<td>7</td>
+<td>factor</td>
+<td>64</td>
+<td>Cultivar</td>
+</tr>
+<tr class="even">
+<td>8</td>
+<td>variate</td>
+<td>64</td>
+<td>Mean_Population_m2</td>
+</tr>
+<tr class="odd">
+<td>9</td>
+<td>variate</td>
+<td>64</td>
+<td>Plot_Size_m2</td>
+</tr>
+<tr class="even">
+<td>10</td>
+<td>variate</td>
+<td>64</td>
+<td>Plot_Yield_kg</td>
+</tr>
+<tr class="odd">
+<td>11</td>
+<td>variate</td>
+<td>64</td>
+<td>Harvest_Moisture</td>
+</tr>
+<tr class="even">
+<td>12</td>
+<td>variate</td>
+<td>64</td>
+<td>Yield_14%_t_ha_adj</td>
+</tr>
+</tbody>
+</table>
+<div style="page-break-after: always;"></div>
+<hr />
+<p><strong>Analysis of variance</strong></p>
+<p>Variate: Mean_Population_m2</p>
+<p>Source of variation d.f. s.s. m.s. v.r. F pr.</p>
+<p>Rep stratum 3 2290.4 763.5 5.64</p>
+<p>Rep.<em>Units</em> stratum Cultivar 15 10057.2 670.5 4.95 &lt;.001
+Residual 45 6093.6 135.4</p>
+<p>Total 63 18441.3</p>
+<p><strong>Tables of means</strong></p>
+<p>Variate: Mean_Population_m2</p>
+<p>Grand mean 110.</p>
+<p>Cultivar Blaze Brilliant CAW722 CAW733 Encore Envy Excess 88. 109.
+135. 128. 120. 108. 105.</p>
+<p>Cultivar Flame Monarch Nelson Resolve Sirus Victor Wanaka 106. 90.
+103. 92. 110. 115. 114.</p>
+<p>Cultivar WHT951 WWT1695 115. 122.</p>
+<p><em><em>Least significant differences of means (5%
+level)</em></em></p>
+<p>Table Cultivar rep. 4 d.f. 45 l.s.d. 16.6</p>
+<p><strong>Fisher’s protected least significant difference
+test</strong></p>
+<p><em><em>Cultivar</em></em></p>
+<pre><code>             Mean</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Item</th>
+<th>Value</th>
+<th>Rank</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Blaze</td>
+<td>87.9</td>
+<td>a</td>
+</tr>
+<tr class="even">
+<td>Monarch</td>
+<td>90.0</td>
+<td>ab</td>
+</tr>
+<tr class="odd">
+<td>Resolve</td>
+<td>92.1</td>
+<td>abc</td>
+</tr>
+<tr class="even">
+<td>Nelson</td>
+<td>103.3</td>
+<td>abcd</td>
+</tr>
+<tr class="odd">
+<td>Excess</td>
+<td>104.6</td>
+<td>bcd</td>
+</tr>
+<tr class="even">
+<td>Flame</td>
+<td>105.8</td>
+<td>bcde</td>
+</tr>
+<tr class="odd">
+<td>Envy</td>
+<td>108.3</td>
+<td>cde</td>
+</tr>
+<tr class="even">
+<td>Brilliant</td>
+<td>108.8</td>
+<td>de</td>
+</tr>
+<tr class="odd">
+<td>Sirus</td>
+<td>110.0</td>
+<td>de</td>
+</tr>
+<tr class="even">
+<td>Wanaka</td>
+<td>114.2</td>
+<td>def</td>
+</tr>
+<tr class="odd">
+<td>WHT951</td>
+<td>115.0</td>
+<td>def</td>
+</tr>
+<tr class="even">
+<td>Victor</td>
+<td>115.4</td>
+<td>def</td>
+</tr>
+<tr class="odd">
+<td>Encore</td>
+<td>119.6</td>
+<td>defg</td>
+</tr>
+<tr class="even">
+<td>WWT1695</td>
+<td>121.7</td>
+<td>efg</td>
+</tr>
+<tr class="odd">
+<td>CAW733</td>
+<td>127.5</td>
+<td>fg</td>
+</tr>
+<tr class="even">
+<td>CAW722</td>
+<td>134.6</td>
+<td>g</td>
+</tr>
+</tbody>
+</table>
+<div style="page-break-after: always;"></div>
+<hr />
+<p><strong>Analysis of variance</strong></p>
+<p>Variate: Harvest_Moisture</p>
+<p>Source of variation d.f. s.s. m.s. v.r. F pr.</p>
+<p>Rep stratum 3 0.23047 0.07682 2.06</p>
+<p>Rep.<em>Units</em> stratum Cultivar 15 5.47109 0.36474 9.79 &lt;.001
+Residual 45 1.67703 0.03727</p>
+<p>Total 63 7.37859</p>
+<ul>
+<li>MESSAGE: the following units have large residuals.</li>
+</ul>
+<p>Rep 4 <em>units</em> 1 -0.5 s.e. 0.2</p>
+<p><strong>Tables of means</strong></p>
+<p>Variate: Harvest_Moisture</p>
+<p>Grand mean 13.6</p>
+<p>Cultivar Blaze Brilliant CAW722 CAW733 Encore Envy Excess 13.6 13.5
+13.2 14.1 13.6 13.4 13.6</p>
+<p>Cultivar Flame Monarch Nelson Resolve Sirus Victor Wanaka 13.6 13.1
+13.6 13.3 13.3 13.5 14.2</p>
+<p>Cultivar WHT951 WWT1695 13.4 13.9</p>
+<p><em><em>Least significant differences of means (5%
+level)</em></em></p>
+<p>Table Cultivar rep. 4 d.f. 45 l.s.d. 0.27</p>
+<p><strong>Fisher’s protected least significant difference
+test</strong></p>
+<p><em><em>Cultivar</em></em></p>
+<pre><code>             Mean</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Item</th>
+<th>Value</th>
+<th>Rank</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Monarch</td>
+<td>13.10</td>
+<td>a</td>
+</tr>
+<tr class="even">
+<td>CAW722</td>
+<td>13.20</td>
+<td>ab</td>
+</tr>
+<tr class="odd">
+<td>Resolve</td>
+<td>13.35</td>
+<td>abc</td>
+</tr>
+<tr class="even">
+<td>Sirus</td>
+<td>13.35</td>
+<td>abc</td>
+</tr>
+<tr class="odd">
+<td>Envy</td>
+<td>13.40</td>
+<td>bc</td>
+</tr>
+<tr class="even">
+<td>WHT951</td>
+<td>13.40</td>
+<td>bc</td>
+</tr>
+<tr class="odd">
+<td>Brilliant</td>
+<td>13.45</td>
+<td>bc</td>
+</tr>
+<tr class="even">
+<td>Victor</td>
+<td>13.50</td>
+<td>c</td>
+</tr>
+<tr class="odd">
+<td>Encore</td>
+<td>13.55</td>
+<td>c</td>
+</tr>
+<tr class="even">
+<td>Nelson</td>
+<td>13.55</td>
+<td>c</td>
+</tr>
+<tr class="odd">
+<td>Flame</td>
+<td>13.58</td>
+<td>c</td>
+</tr>
+<tr class="even">
+<td>Blaze</td>
+<td>13.60</td>
+<td>c</td>
+</tr>
+<tr class="odd">
+<td>Excess</td>
+<td>13.60</td>
+<td>c</td>
+</tr>
+<tr class="even">
+<td>WWT1695</td>
+<td>13.95</td>
+<td>d</td>
+</tr>
+<tr class="odd">
+<td>CAW733</td>
+<td>14.05</td>
+<td>de</td>
+</tr>
+<tr class="even">
+<td>Wanaka</td>
+<td>14.25</td>
+<td>e</td>
+</tr>
+</tbody>
+</table>
+<div style="page-break-after: always;"></div>
+<hr />
+<p><strong>Analysis of variance</strong></p>
+<p>Variate: Yield_14%_t_ha_adj</p>
+<p>Source of variation d.f. s.s. m.s. v.r. F pr.</p>
+<p>Rep stratum 3 26.7714 8.9238 73.73</p>
+<p>Rep.<em>Units</em> stratum Cultivar 15 10.6535 0.7102 5.87 &lt;.001
+Residual 45 5.4464 0.1210</p>
+<p>Total 63 42.8713</p>
+<ul>
+<li>MESSAGE: the following units have large residuals.</li>
+</ul>
+<p>Rep 1 <em>units</em> 9 0.67 s.e. 0.29 Rep 3 <em>units</em> 6 -0.67
+s.e. 0.29</p>
+<p><strong>Tables of means</strong></p>
+<p>Variate: Yield_14%_t_ha_adj</p>
+<p>Grand mean 14.45</p>
+<p>Cultivar Blaze Brilliant CAW722 CAW733 Encore Envy Excess 14.47 14.23
+14.15 14.75 14.26 14.29 13.83</p>
+<p>Cultivar Flame Monarch Nelson Resolve Sirus Victor Wanaka 14.14 14.64
+13.90 13.94 14.90 15.24 14.75</p>
+<p>Cultivar WHT951 WWT1695 15.01 14.68</p>
+<p><em><em>Least significant differences of means (5%
+level)</em></em></p>
+<p>Table Cultivar rep. 4 d.f. 45 l.s.d. 0.495</p>
+<p><strong>Fisher’s protected least significant difference
+test</strong></p>
+<p><em><em>Cultivar</em></em></p>
+<pre><code>             Mean</code></pre>
+<p><em><em>Loading Spreadsheet File</em></em></p>
+<p>Catalogue of file WheatTrials.xlsx</p>
+<p>Sheet Title: Trial A4 Description: Data read from D:.xlsx [Trial
+A4]A2:L65 Sheet Type: vector Index Type Nval Name</p>
+<table>
+<thead>
+<tr class="header">
+<th>Index</th>
+<th>Type</th>
+<th>Nval</th>
+<th>Name</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>factor</td>
+<td>64</td>
+<td>Entry</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>factor</td>
+<td>64</td>
+<td>Plot</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>factor</td>
+<td>64</td>
+<td>Row</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td>factor</td>
+<td>64</td>
+<td>Column</td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td>factor</td>
+<td>64</td>
+<td>Block</td>
+</tr>
+<tr class="even">
+<td>6</td>
+<td>factor</td>
+<td>64</td>
+<td>Rep</td>
+</tr>
+<tr class="odd">
+<td>7</td>
+<td>factor</td>
+<td>64</td>
+<td>Cultivar</td>
+</tr>
+<tr class="even">
+<td>8</td>
+<td>variate</td>
+<td>64</td>
+<td>Mean_Population_m2</td>
+</tr>
+<tr class="odd">
+<td>9</td>
+<td>variate</td>
+<td>64</td>
+<td>Plot_Size_m2</td>
+</tr>
+<tr class="even">
+<td>10</td>
+<td>variate</td>
+<td>64</td>
+<td>Plot_Yield_kg</td>
+</tr>
+<tr class="odd">
+<td>11</td>
+<td>variate</td>
+<td>64</td>
+<td>Harvest_Moisture</td>
+</tr>
+<tr class="even">
+<td>12</td>
+<td>variate</td>
+<td>64</td>
+<td>Yield_14%_t_ha_adj</td>
+</tr>
+</tbody>
+</table>
+<div style="page-break-after: always;"></div>
+<hr />
+<p><strong>Analysis of variance</strong></p>
+<p>Variate: Mean_Population_m2</p>
+<p>Source of variation d.f. s.s. m.s. v.r. F pr.</p>
+<p>Rep stratum 3 470.6 156.9 1.20</p>
+<p>Rep.<em>Units</em> stratum Cultivar 15 3480.6 232.0 1.78 0.069
+Residual 45 5863.5 130.3</p>
+<p>Total 63 9814.7</p>
+<ul>
+<li>MESSAGE: the following units have large residuals.</li>
+</ul>
+<p>Rep 1 <em>units</em> 1 28. s.e. 10. Rep 2 <em>units</em> 7 29. s.e.
+10.</p>
+<p><strong>Tables of means</strong></p>
+<p>Variate: Mean_Population_m2</p>
+<p>Grand mean 118.</p>
+<p>Cultivar Blaze Brilliant CAW722 CAW733 Encore Envy Excess 105. 109.
+133. 128. 118. 112. 125.</p>
+<p>Cultivar Flame Monarch Nelson Resolve Sirus Victor Wanaka 114. 116.
+115. 117. 129. 119. 116.</p>
+<p>Cultivar WHT951 WWT1695 115. 113.</p>
+<p><em><em>Least significant differences of means (5%
+level)</em></em></p>
+<p>Table Cultivar rep. 4 d.f. 45 l.s.d. 16.3</p>
+<p><strong>Fisher’s protected least significant difference
+test</strong></p>
+<p><em><em>Cultivar</em></em></p>
+<p><span style="color:red;">******** Warning 130, code UF 2, statement
+242 in procedure AMCOMPARISON</span> <span style="color:red;">Fisher’s
+protected LSD is not calculated as variance ratio for Cultivar is
+not</span> <span style="color:red;">significant.</span></p>
+<div style="page-break-after: always;"></div>
+<hr />
+<p><strong>Analysis of variance</strong></p>
+<p>Variate: Harvest_Moisture</p>
+<p>Source of variation d.f. s.s. m.s. v.r. F pr.</p>
+<p>Rep stratum 3 0.54172 0.18057 2.01</p>
+<p>Rep.<em>Units</em> stratum Cultivar 15 8.60734 0.57382 6.38 &lt;.001
+Residual 45 4.04578 0.08991</p>
+<p>Total 63 13.19484</p>
+<ul>
+<li>MESSAGE: the following units have large residuals.</li>
+</ul>
+<p>Rep 3 <em>units</em> 16 0.6 s.e. 0.3</p>
+<p><strong>Tables of means</strong></p>
+<p>Variate: Harvest_Moisture</p>
+<p>Grand mean 18.2</p>
+<p>Cultivar Blaze Brilliant CAW722 CAW733 Encore Envy Excess 18.8 18.0
+17.9 18.1 18.3 18.1 18.0</p>
+<p>Cultivar Flame Monarch Nelson Resolve Sirus Victor Wanaka 18.4 18.0
+18.4 18.2 17.3 18.0 19.0</p>
+<p>Cultivar WHT951 WWT1695 18.3 18.3</p>
+<p><em><em>Least significant differences of means (5%
+level)</em></em></p>
+<p>Table Cultivar rep. 4 d.f. 45 l.s.d. 0.43</p>
+<p><strong>Fisher’s protected least significant difference
+test</strong></p>
+<p><em><em>Cultivar</em></em></p>
+<pre><code>             Mean</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Item</th>
+<th>Value</th>
+<th>Rank</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Sirus</td>
+<td>17.28</td>
+<td>a</td>
+</tr>
+<tr class="even">
+<td>CAW722</td>
+<td>17.93</td>
+<td>b</td>
+</tr>
+<tr class="odd">
+<td>Brilliant</td>
+<td>17.95</td>
+<td>bc</td>
+</tr>
+<tr class="even">
+<td>Monarch</td>
+<td>17.98</td>
+<td>bc</td>
+</tr>
+<tr class="odd">
+<td>Excess</td>
+<td>18.00</td>
+<td>bc</td>
+</tr>
+<tr class="even">
+<td>Victor</td>
+<td>18.00</td>
+<td>bc</td>
+</tr>
+<tr class="odd">
+<td>Envy</td>
+<td>18.05</td>
+<td>bc</td>
+</tr>
+<tr class="even">
+<td>CAW733</td>
+<td>18.13</td>
+<td>bc</td>
+</tr>
+<tr class="odd">
+<td>Resolve</td>
+<td>18.20</td>
+<td>bc</td>
+</tr>
+<tr class="even">
+<td>Encore</td>
+<td>18.25</td>
+<td>bc</td>
+</tr>
+<tr class="odd">
+<td>WHT951</td>
+<td>18.28</td>
+<td>bc</td>
+</tr>
+<tr class="even">
+<td>WWT1695</td>
+<td>18.33</td>
+<td>bc</td>
+</tr>
+<tr class="odd">
+<td>Nelson</td>
+<td>18.35</td>
+<td>bcd</td>
+</tr>
+<tr class="even">
+<td>Flame</td>
+<td>18.38</td>
+<td>cd</td>
+</tr>
+<tr class="odd">
+<td>Blaze</td>
+<td>18.78</td>
+<td>de</td>
+</tr>
+<tr class="even">
+<td>Wanaka</td>
+<td>18.98</td>
+<td>e</td>
+</tr>
+</tbody>
+</table>
+<div style="page-break-after: always;"></div>
+<hr />
+<p><strong>Analysis of variance</strong></p>
+<p>Variate: Yield_14%_t_ha_adj</p>
+<p>Source of variation d.f. s.s. m.s. v.r. F pr.</p>
+<p>Rep stratum 3 3.6444 1.2148 6.10</p>
+<p>Rep.<em>Units</em> stratum Cultivar 15 27.7649 1.8510 9.29 &lt;.001
+Residual 45 8.9616 0.1991</p>
+<p>Total 63 40.3709</p>
+<p><strong>Tables of means</strong></p>
+<p>Variate: Yield_14%_t_ha_adj</p>
+<p>Grand mean 11.26</p>
+<p>Cultivar Blaze Brilliant CAW722 CAW733 Encore Envy Excess 11.66 10.55
+12.02 11.87 11.21 11.76 10.47</p>
+<p>Cultivar Flame Monarch Nelson Resolve Sirus Victor Wanaka 10.92 11.29
+10.55 10.20 11.45 11.28 10.75</p>
+<p>Cultivar WHT951 WWT1695 12.80 11.45</p>
+<p><em><em>Least significant differences of means (5%
+level)</em></em></p>
+<p>Table Cultivar rep. 4 d.f. 45 l.s.d. 0.636</p>
+<p><strong>Fisher’s protected least significant difference
+test</strong></p>
+<p><em><em>Cultivar</em></em></p>
+<pre><code>             Mean</code></pre>
+<table>
+<thead>
+<tr class="header">
+<th>Item</th>
+<th>Value</th>
+<th>Rank</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Resolve</td>
+<td>10.20</td>
+<td>a</td>
+</tr>
+<tr class="even">
+<td>Excess</td>
+<td>10.47</td>
+<td>ab</td>
+</tr>
+<tr class="odd">
+<td>Brilliant</td>
+<td>10.55</td>
+<td>ab</td>
+</tr>
+<tr class="even">
+<td>Nelson</td>
+<td>10.55</td>
+<td>ab</td>
+</tr>
+<tr class="odd">
+<td>Wanaka</td>
+<td>10.75</td>
+<td>abc</td>
+</tr>
+<tr class="even">
+<td>Flame</td>
+<td>10.92</td>
+<td>bcd</td>
+</tr>
+<tr class="odd">
+<td>Encore</td>
+<td>11.21</td>
+<td>cde</td>
+</tr>
+<tr class="even">
+<td>Victor</td>
+<td>11.28</td>
+<td>cdef</td>
+</tr>
+<tr class="odd">
+<td>Monarch</td>
+<td>11.29</td>
+<td>cdef</td>
+</tr>
+<tr class="even">
+<td>WWT1695</td>
+<td>11.45</td>
+<td>defg</td>
+</tr>
+<tr class="odd">
+<td>Sirus</td>
+<td>11.45</td>
+<td>defg</td>
+</tr>
+<tr class="even">
+<td>Blaze</td>
+<td>11.66</td>
+<td>efg</td>
+</tr>
+<tr class="odd">
+<td>Envy</td>
+<td>11.76</td>
+<td>efg</td>
+</tr>
+<tr class="even">
+<td>CAW733</td>
+<td>11.87</td>
+<td>fg</td>
+</tr>
+<tr class="odd">
+<td>CAW722</td>
+<td>12.02</td>
+<td>g</td>
+</tr>
+<tr class="even">
+<td>WHT951</td>
+<td>12.80</td>
+<td>h</td>
+</tr>
+</tbody>
+</table>
+<p>You can enable <strong>table storage</strong> by setting options in
+the chunk header:</p>
+<p>{gs, format_complex_tables=TRUE, format_simple_tables=TRUE}</p>
+<p>-Tables will be available as lists in global variables:</p>
+<ol style="list-style-type: decimal">
+<li><p>complex_tables_all_chunks</p></li>
+<li><p>simple_tables_all_chunks</p></li>
+</ol>
+<p>Example:</p>
+<div class="sourceCode" id="cb17"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" tabindex="-1"></a>complex_tables_all_chunks</span>
+<span id="cb17-2"><a href="#cb17-2" tabindex="-1"></a><span class="co">#&gt; [[1]]</span></span>
+<span id="cb17-3"><a href="#cb17-3" tabindex="-1"></a><span class="co">#&gt; [[1]][[1]]</span></span>
+<span id="cb17-4"><a href="#cb17-4" tabindex="-1"></a><span class="co">#&gt;    Index    Type Nval               Name</span></span>
+<span id="cb17-5"><a href="#cb17-5" tabindex="-1"></a><span class="co">#&gt; 1      1  factor   52              Entry</span></span>
+<span id="cb17-6"><a href="#cb17-6" tabindex="-1"></a><span class="co">#&gt; 2      2  factor   52               Plot</span></span>
+<span id="cb17-7"><a href="#cb17-7" tabindex="-1"></a><span class="co">#&gt; 3      3  factor   52                Row</span></span>
+<span id="cb17-8"><a href="#cb17-8" tabindex="-1"></a><span class="co">#&gt; 4      4  factor   52             Column</span></span>
+<span id="cb17-9"><a href="#cb17-9" tabindex="-1"></a><span class="co">#&gt; 5      5  factor   52              Block</span></span>
+<span id="cb17-10"><a href="#cb17-10" tabindex="-1"></a><span class="co">#&gt; 6      6  factor   52                Rep</span></span>
+<span id="cb17-11"><a href="#cb17-11" tabindex="-1"></a><span class="co">#&gt; 7      7  factor   52           Cultivar</span></span>
+<span id="cb17-12"><a href="#cb17-12" tabindex="-1"></a><span class="co">#&gt; 8      8 variate   52 Mean_Population_m2</span></span>
+<span id="cb17-13"><a href="#cb17-13" tabindex="-1"></a><span class="co">#&gt; 9      9 variate   52       Plot_Size_m2</span></span>
+<span id="cb17-14"><a href="#cb17-14" tabindex="-1"></a><span class="co">#&gt; 10    10 variate   52      Plot_Yield_kg</span></span>
+<span id="cb17-15"><a href="#cb17-15" tabindex="-1"></a><span class="co">#&gt; 11    11 variate   52   Harvest_Moisture</span></span>
+<span id="cb17-16"><a href="#cb17-16" tabindex="-1"></a><span class="co">#&gt; 12    12 variate   52 Yield_14%_t_ha_adj</span></span>
+<span id="cb17-17"><a href="#cb17-17" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb17-18"><a href="#cb17-18" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb17-19"><a href="#cb17-19" tabindex="-1"></a><span class="co">#&gt; [[2]]</span></span>
+<span id="cb17-20"><a href="#cb17-20" tabindex="-1"></a><span class="co">#&gt; [[2]][[1]]</span></span>
+<span id="cb17-21"><a href="#cb17-21" tabindex="-1"></a><span class="co">#&gt;    Index    Type Nval               Name</span></span>
+<span id="cb17-22"><a href="#cb17-22" tabindex="-1"></a><span class="co">#&gt; 1      1  factor   64              Entry</span></span>
+<span id="cb17-23"><a href="#cb17-23" tabindex="-1"></a><span class="co">#&gt; 2      2  factor   64               Plot</span></span>
+<span id="cb17-24"><a href="#cb17-24" tabindex="-1"></a><span class="co">#&gt; 3      3  factor   64                Row</span></span>
+<span id="cb17-25"><a href="#cb17-25" tabindex="-1"></a><span class="co">#&gt; 4      4  factor   64             Column</span></span>
+<span id="cb17-26"><a href="#cb17-26" tabindex="-1"></a><span class="co">#&gt; 5      5  factor   64              Block</span></span>
+<span id="cb17-27"><a href="#cb17-27" tabindex="-1"></a><span class="co">#&gt; 6      6  factor   64                Rep</span></span>
+<span id="cb17-28"><a href="#cb17-28" tabindex="-1"></a><span class="co">#&gt; 7      7  factor   64           Cultivar</span></span>
+<span id="cb17-29"><a href="#cb17-29" tabindex="-1"></a><span class="co">#&gt; 8      8 variate   64 Mean_Population_m2</span></span>
+<span id="cb17-30"><a href="#cb17-30" tabindex="-1"></a><span class="co">#&gt; 9      9 variate   64       Plot_Size_m2</span></span>
+<span id="cb17-31"><a href="#cb17-31" tabindex="-1"></a><span class="co">#&gt; 10    10 variate   64      Plot_Yield_kg</span></span>
+<span id="cb17-32"><a href="#cb17-32" tabindex="-1"></a><span class="co">#&gt; 11    11 variate   64   Harvest_Moisture</span></span>
+<span id="cb17-33"><a href="#cb17-33" tabindex="-1"></a><span class="co">#&gt; 12    12 variate   64 Yield_14%_t_ha_adj</span></span>
+<span id="cb17-34"><a href="#cb17-34" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb17-35"><a href="#cb17-35" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb17-36"><a href="#cb17-36" tabindex="-1"></a><span class="co">#&gt; [[3]]</span></span>
+<span id="cb17-37"><a href="#cb17-37" tabindex="-1"></a><span class="co">#&gt; list()</span></span>
+<span id="cb17-38"><a href="#cb17-38" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb17-39"><a href="#cb17-39" tabindex="-1"></a><span class="co">#&gt; [[4]]</span></span>
+<span id="cb17-40"><a href="#cb17-40" tabindex="-1"></a><span class="co">#&gt; [[4]][[1]]</span></span>
+<span id="cb17-41"><a href="#cb17-41" tabindex="-1"></a><span class="co">#&gt;    Index    Type Nval               Name</span></span>
+<span id="cb17-42"><a href="#cb17-42" tabindex="-1"></a><span class="co">#&gt; 1      1  factor   64              Entry</span></span>
+<span id="cb17-43"><a href="#cb17-43" tabindex="-1"></a><span class="co">#&gt; 2      2  factor   64               Plot</span></span>
+<span id="cb17-44"><a href="#cb17-44" tabindex="-1"></a><span class="co">#&gt; 3      3  factor   64                Row</span></span>
+<span id="cb17-45"><a href="#cb17-45" tabindex="-1"></a><span class="co">#&gt; 4      4  factor   64             Column</span></span>
+<span id="cb17-46"><a href="#cb17-46" tabindex="-1"></a><span class="co">#&gt; 5      5  factor   64              Block</span></span>
+<span id="cb17-47"><a href="#cb17-47" tabindex="-1"></a><span class="co">#&gt; 6      6  factor   64                Rep</span></span>
+<span id="cb17-48"><a href="#cb17-48" tabindex="-1"></a><span class="co">#&gt; 7      7  factor   64           Cultivar</span></span>
+<span id="cb17-49"><a href="#cb17-49" tabindex="-1"></a><span class="co">#&gt; 8      8 variate   64 Mean_Population_m2</span></span>
+<span id="cb17-50"><a href="#cb17-50" tabindex="-1"></a><span class="co">#&gt; 9      9 variate   64       Plot_Size_m2</span></span>
+<span id="cb17-51"><a href="#cb17-51" tabindex="-1"></a><span class="co">#&gt; 10    10 variate   64      Plot_Yield_kg</span></span>
+<span id="cb17-52"><a href="#cb17-52" tabindex="-1"></a><span class="co">#&gt; 11    11 variate   64   Harvest_Moisture</span></span>
+<span id="cb17-53"><a href="#cb17-53" tabindex="-1"></a><span class="co">#&gt; 12    12 variate   64 Yield_14%_t_ha_adj</span></span>
+<span id="cb17-54"><a href="#cb17-54" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb17-55"><a href="#cb17-55" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb17-56"><a href="#cb17-56" tabindex="-1"></a><span class="co">#&gt; [[5]]</span></span>
+<span id="cb17-57"><a href="#cb17-57" tabindex="-1"></a><span class="co">#&gt; list()</span></span>
+<span id="cb17-58"><a href="#cb17-58" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb17-59"><a href="#cb17-59" tabindex="-1"></a><span class="co">#&gt; [[6]]</span></span>
+<span id="cb17-60"><a href="#cb17-60" tabindex="-1"></a><span class="co">#&gt; [[6]][[1]]</span></span>
+<span id="cb17-61"><a href="#cb17-61" tabindex="-1"></a><span class="co">#&gt;    Index    Type Nval               Name</span></span>
+<span id="cb17-62"><a href="#cb17-62" tabindex="-1"></a><span class="co">#&gt; 1      1  factor   64              Entry</span></span>
+<span id="cb17-63"><a href="#cb17-63" tabindex="-1"></a><span class="co">#&gt; 2      2  factor   64               Plot</span></span>
+<span id="cb17-64"><a href="#cb17-64" tabindex="-1"></a><span class="co">#&gt; 3      3  factor   64                Row</span></span>
+<span id="cb17-65"><a href="#cb17-65" tabindex="-1"></a><span class="co">#&gt; 4      4  factor   64             Column</span></span>
+<span id="cb17-66"><a href="#cb17-66" tabindex="-1"></a><span class="co">#&gt; 5      5  factor   64              Block</span></span>
+<span id="cb17-67"><a href="#cb17-67" tabindex="-1"></a><span class="co">#&gt; 6      6  factor   64                Rep</span></span>
+<span id="cb17-68"><a href="#cb17-68" tabindex="-1"></a><span class="co">#&gt; 7      7  factor   64           Cultivar</span></span>
+<span id="cb17-69"><a href="#cb17-69" tabindex="-1"></a><span class="co">#&gt; 8      8 variate   64 Mean_Population_m2</span></span>
+<span id="cb17-70"><a href="#cb17-70" tabindex="-1"></a><span class="co">#&gt; 9      9 variate   64       Plot_Size_m2</span></span>
+<span id="cb17-71"><a href="#cb17-71" tabindex="-1"></a><span class="co">#&gt; 10    10 variate   64      Plot_Yield_kg</span></span>
+<span id="cb17-72"><a href="#cb17-72" tabindex="-1"></a><span class="co">#&gt; 11    11 variate   64   Harvest_Moisture</span></span>
+<span id="cb17-73"><a href="#cb17-73" tabindex="-1"></a><span class="co">#&gt; 12    12 variate   64 Yield_14%_t_ha_adj</span></span>
+<span id="cb17-74"><a href="#cb17-74" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb17-75"><a href="#cb17-75" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb17-76"><a href="#cb17-76" tabindex="-1"></a><span class="co">#&gt; [[7]]</span></span>
+<span id="cb17-77"><a href="#cb17-77" tabindex="-1"></a><span class="co">#&gt; list()</span></span>
+<span id="cb17-78"><a href="#cb17-78" tabindex="-1"></a>simple_tables_all_chunks</span>
+<span id="cb17-79"><a href="#cb17-79" tabindex="-1"></a><span class="co">#&gt; [[1]]</span></span>
+<span id="cb17-80"><a href="#cb17-80" tabindex="-1"></a><span class="co">#&gt; list()</span></span>
+<span id="cb17-81"><a href="#cb17-81" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb17-82"><a href="#cb17-82" tabindex="-1"></a><span class="co">#&gt; [[2]]</span></span>
+<span id="cb17-83"><a href="#cb17-83" tabindex="-1"></a><span class="co">#&gt; [[2]][[1]]</span></span>
+<span id="cb17-84"><a href="#cb17-84" tabindex="-1"></a><span class="co">#&gt;       Item Value Rank</span></span>
+<span id="cb17-85"><a href="#cb17-85" tabindex="-1"></a><span class="co">#&gt; 1    Blaze 15.02   ab</span></span>
+<span id="cb17-86"><a href="#cb17-86" tabindex="-1"></a><span class="co">#&gt; 2   Nelson 15.10   ab</span></span>
+<span id="cb17-87"><a href="#cb17-87" tabindex="-1"></a><span class="co">#&gt; 3   Encore 15.15  abc</span></span>
+<span id="cb17-88"><a href="#cb17-88" tabindex="-1"></a><span class="co">#&gt; 4   CAW722 15.22 abcd</span></span>
+<span id="cb17-89"><a href="#cb17-89" tabindex="-1"></a><span class="co">#&gt; 5  WWT1695 15.25 abcd</span></span>
+<span id="cb17-90"><a href="#cb17-90" tabindex="-1"></a><span class="co">#&gt; 6   Excess 15.47 bcde</span></span>
+<span id="cb17-91"><a href="#cb17-91" tabindex="-1"></a><span class="co">#&gt; 7    Sirus 15.57 cdef</span></span>
+<span id="cb17-92"><a href="#cb17-92" tabindex="-1"></a><span class="co">#&gt; 8  Resolve 15.62 defg</span></span>
+<span id="cb17-93"><a href="#cb17-93" tabindex="-1"></a><span class="co">#&gt; 9   Victor 15.77  efg</span></span>
+<span id="cb17-94"><a href="#cb17-94" tabindex="-1"></a><span class="co">#&gt; 10   Flame 16.02   fg</span></span>
+<span id="cb17-95"><a href="#cb17-95" tabindex="-1"></a><span class="co">#&gt; 11  Wanaka 16.02   fg</span></span>
+<span id="cb17-96"><a href="#cb17-96" tabindex="-1"></a><span class="co">#&gt; 12 Monarch 16.07    g</span></span>
+<span id="cb17-97"><a href="#cb17-97" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb17-98"><a href="#cb17-98" tabindex="-1"></a><span class="co">#&gt; [[2]][[2]]</span></span>
+<span id="cb17-99"><a href="#cb17-99" tabindex="-1"></a><span class="co">#&gt;       Item Value Rank</span></span>
+<span id="cb17-100"><a href="#cb17-100" tabindex="-1"></a><span class="co">#&gt; 1   Excess 10.60    a</span></span>
+<span id="cb17-101"><a href="#cb17-101" tabindex="-1"></a><span class="co">#&gt; 2    Sirus 11.32   ab</span></span>
+<span id="cb17-102"><a href="#cb17-102" tabindex="-1"></a><span class="co">#&gt; 3   Wanaka 12.07   bc</span></span>
+<span id="cb17-103"><a href="#cb17-103" tabindex="-1"></a><span class="co">#&gt; 4    Blaze 12.23   bc</span></span>
+<span id="cb17-104"><a href="#cb17-104" tabindex="-1"></a><span class="co">#&gt; 5   Victor 12.29   bc</span></span>
+<span id="cb17-105"><a href="#cb17-105" tabindex="-1"></a><span class="co">#&gt; 6   Encore 12.42  bcd</span></span>
+<span id="cb17-106"><a href="#cb17-106" tabindex="-1"></a><span class="co">#&gt; 7  Resolve 12.50   cd</span></span>
+<span id="cb17-107"><a href="#cb17-107" tabindex="-1"></a><span class="co">#&gt; 8    Flame 12.62   cd</span></span>
+<span id="cb17-108"><a href="#cb17-108" tabindex="-1"></a><span class="co">#&gt; 9  Monarch 12.70   cd</span></span>
+<span id="cb17-109"><a href="#cb17-109" tabindex="-1"></a><span class="co">#&gt; 10  Nelson 12.75   cd</span></span>
+<span id="cb17-110"><a href="#cb17-110" tabindex="-1"></a><span class="co">#&gt; 11 WWT1695 12.85   cd</span></span>
+<span id="cb17-111"><a href="#cb17-111" tabindex="-1"></a><span class="co">#&gt; 12  CAW722 13.46   de</span></span>
+<span id="cb17-112"><a href="#cb17-112" tabindex="-1"></a><span class="co">#&gt; 13    Envy 14.04    e</span></span>
+<span id="cb17-113"><a href="#cb17-113" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb17-114"><a href="#cb17-114" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb17-115"><a href="#cb17-115" tabindex="-1"></a><span class="co">#&gt; [[3]]</span></span>
+<span id="cb17-116"><a href="#cb17-116" tabindex="-1"></a><span class="co">#&gt; [[3]][[1]]</span></span>
+<span id="cb17-117"><a href="#cb17-117" tabindex="-1"></a><span class="co">#&gt;         Item Value  Rank</span></span>
+<span id="cb17-118"><a href="#cb17-118" tabindex="-1"></a><span class="co">#&gt; 1      Blaze 113.3     a</span></span>
+<span id="cb17-119"><a href="#cb17-119" tabindex="-1"></a><span class="co">#&gt; 2       Envy 122.1    ab</span></span>
+<span id="cb17-120"><a href="#cb17-120" tabindex="-1"></a><span class="co">#&gt; 3    Resolve 126.3   abc</span></span>
+<span id="cb17-121"><a href="#cb17-121" tabindex="-1"></a><span class="co">#&gt; 4    Monarch 129.2  abcd</span></span>
+<span id="cb17-122"><a href="#cb17-122" tabindex="-1"></a><span class="co">#&gt; 5  Brilliant 136.7  bcde</span></span>
+<span id="cb17-123"><a href="#cb17-123" tabindex="-1"></a><span class="co">#&gt; 6     Excess 139.2 bcdef</span></span>
+<span id="cb17-124"><a href="#cb17-124" tabindex="-1"></a><span class="co">#&gt; 7      Flame 139.2 bcdef</span></span>
+<span id="cb17-125"><a href="#cb17-125" tabindex="-1"></a><span class="co">#&gt; 8     Wanaka 140.0  cdef</span></span>
+<span id="cb17-126"><a href="#cb17-126" tabindex="-1"></a><span class="co">#&gt; 9     Encore 140.4  cdef</span></span>
+<span id="cb17-127"><a href="#cb17-127" tabindex="-1"></a><span class="co">#&gt; 10   WWT1695 140.8  cdef</span></span>
+<span id="cb17-128"><a href="#cb17-128" tabindex="-1"></a><span class="co">#&gt; 11    Victor 142.1 cdefg</span></span>
+<span id="cb17-129"><a href="#cb17-129" tabindex="-1"></a><span class="co">#&gt; 12     Sirus 142.9 cdefg</span></span>
+<span id="cb17-130"><a href="#cb17-130" tabindex="-1"></a><span class="co">#&gt; 13    Nelson 146.3  defg</span></span>
+<span id="cb17-131"><a href="#cb17-131" tabindex="-1"></a><span class="co">#&gt; 14    CAW733 149.2   efg</span></span>
+<span id="cb17-132"><a href="#cb17-132" tabindex="-1"></a><span class="co">#&gt; 15    CAW722 154.2    fg</span></span>
+<span id="cb17-133"><a href="#cb17-133" tabindex="-1"></a><span class="co">#&gt; 16    WHT951 158.3     g</span></span>
+<span id="cb17-134"><a href="#cb17-134" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb17-135"><a href="#cb17-135" tabindex="-1"></a><span class="co">#&gt; [[3]][[2]]</span></span>
+<span id="cb17-136"><a href="#cb17-136" tabindex="-1"></a><span class="co">#&gt;         Item Value  Rank</span></span>
+<span id="cb17-137"><a href="#cb17-137" tabindex="-1"></a><span class="co">#&gt; 1  Brilliant 13.13     a</span></span>
+<span id="cb17-138"><a href="#cb17-138" tabindex="-1"></a><span class="co">#&gt; 2    Monarch 13.15    ab</span></span>
+<span id="cb17-139"><a href="#cb17-139" tabindex="-1"></a><span class="co">#&gt; 3      Sirus 13.23   abc</span></span>
+<span id="cb17-140"><a href="#cb17-140" tabindex="-1"></a><span class="co">#&gt; 4     CAW722 13.25  abcd</span></span>
+<span id="cb17-141"><a href="#cb17-141" tabindex="-1"></a><span class="co">#&gt; 5     Nelson 13.30 abcde</span></span>
+<span id="cb17-142"><a href="#cb17-142" tabindex="-1"></a><span class="co">#&gt; 6      Blaze 13.33  bcde</span></span>
+<span id="cb17-143"><a href="#cb17-143" tabindex="-1"></a><span class="co">#&gt; 7     Victor 13.35   cde</span></span>
+<span id="cb17-144"><a href="#cb17-144" tabindex="-1"></a><span class="co">#&gt; 8       Envy 13.38  cdef</span></span>
+<span id="cb17-145"><a href="#cb17-145" tabindex="-1"></a><span class="co">#&gt; 9     WHT951 13.43   def</span></span>
+<span id="cb17-146"><a href="#cb17-146" tabindex="-1"></a><span class="co">#&gt; 10   Resolve 13.45    ef</span></span>
+<span id="cb17-147"><a href="#cb17-147" tabindex="-1"></a><span class="co">#&gt; 11    Excess 13.48    ef</span></span>
+<span id="cb17-148"><a href="#cb17-148" tabindex="-1"></a><span class="co">#&gt; 12    Encore 13.55    fg</span></span>
+<span id="cb17-149"><a href="#cb17-149" tabindex="-1"></a><span class="co">#&gt; 13     Flame 13.55    fg</span></span>
+<span id="cb17-150"><a href="#cb17-150" tabindex="-1"></a><span class="co">#&gt; 14   WWT1695 13.73    gh</span></span>
+<span id="cb17-151"><a href="#cb17-151" tabindex="-1"></a><span class="co">#&gt; 15    CAW733 13.75     h</span></span>
+<span id="cb17-152"><a href="#cb17-152" tabindex="-1"></a><span class="co">#&gt; 16    Wanaka 14.45     i</span></span>
+<span id="cb17-153"><a href="#cb17-153" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb17-154"><a href="#cb17-154" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb17-155"><a href="#cb17-155" tabindex="-1"></a><span class="co">#&gt; [[4]]</span></span>
+<span id="cb17-156"><a href="#cb17-156" tabindex="-1"></a><span class="co">#&gt; [[4]][[1]]</span></span>
+<span id="cb17-157"><a href="#cb17-157" tabindex="-1"></a><span class="co">#&gt;         Item Value  Rank</span></span>
+<span id="cb17-158"><a href="#cb17-158" tabindex="-1"></a><span class="co">#&gt; 1    Resolve 10.00     a</span></span>
+<span id="cb17-159"><a href="#cb17-159" tabindex="-1"></a><span class="co">#&gt; 2  Brilliant 10.28    ab</span></span>
+<span id="cb17-160"><a href="#cb17-160" tabindex="-1"></a><span class="co">#&gt; 3     Wanaka 10.35    bc</span></span>
+<span id="cb17-161"><a href="#cb17-161" tabindex="-1"></a><span class="co">#&gt; 4      Sirus 10.40   bcd</span></span>
+<span id="cb17-162"><a href="#cb17-162" tabindex="-1"></a><span class="co">#&gt; 5     Encore 10.46  bcde</span></span>
+<span id="cb17-163"><a href="#cb17-163" tabindex="-1"></a><span class="co">#&gt; 6      Flame 10.55  bcde</span></span>
+<span id="cb17-164"><a href="#cb17-164" tabindex="-1"></a><span class="co">#&gt; 7       Envy 10.60 bcdef</span></span>
+<span id="cb17-165"><a href="#cb17-165" tabindex="-1"></a><span class="co">#&gt; 8     Victor 10.62  cdef</span></span>
+<span id="cb17-166"><a href="#cb17-166" tabindex="-1"></a><span class="co">#&gt; 9     Nelson 10.62  cdef</span></span>
+<span id="cb17-167"><a href="#cb17-167" tabindex="-1"></a><span class="co">#&gt; 10    Excess 10.68   def</span></span>
+<span id="cb17-168"><a href="#cb17-168" tabindex="-1"></a><span class="co">#&gt; 11     Blaze 10.73   efg</span></span>
+<span id="cb17-169"><a href="#cb17-169" tabindex="-1"></a><span class="co">#&gt; 12   Monarch 10.90    fg</span></span>
+<span id="cb17-170"><a href="#cb17-170" tabindex="-1"></a><span class="co">#&gt; 13    CAW722 11.05    gh</span></span>
+<span id="cb17-171"><a href="#cb17-171" tabindex="-1"></a><span class="co">#&gt; 14    CAW733 11.29    hi</span></span>
+<span id="cb17-172"><a href="#cb17-172" tabindex="-1"></a><span class="co">#&gt; 15   WWT1695 11.29    hi</span></span>
+<span id="cb17-173"><a href="#cb17-173" tabindex="-1"></a><span class="co">#&gt; 16    WHT951 11.44     i</span></span>
+<span id="cb17-174"><a href="#cb17-174" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb17-175"><a href="#cb17-175" tabindex="-1"></a><span class="co">#&gt; [[4]][[2]]</span></span>
+<span id="cb17-176"><a href="#cb17-176" tabindex="-1"></a><span class="co">#&gt;         Item Value Rank</span></span>
+<span id="cb17-177"><a href="#cb17-177" tabindex="-1"></a><span class="co">#&gt; 1      Blaze  87.9    a</span></span>
+<span id="cb17-178"><a href="#cb17-178" tabindex="-1"></a><span class="co">#&gt; 2    Monarch  90.0   ab</span></span>
+<span id="cb17-179"><a href="#cb17-179" tabindex="-1"></a><span class="co">#&gt; 3    Resolve  92.1  abc</span></span>
+<span id="cb17-180"><a href="#cb17-180" tabindex="-1"></a><span class="co">#&gt; 4     Nelson 103.3 abcd</span></span>
+<span id="cb17-181"><a href="#cb17-181" tabindex="-1"></a><span class="co">#&gt; 5     Excess 104.6  bcd</span></span>
+<span id="cb17-182"><a href="#cb17-182" tabindex="-1"></a><span class="co">#&gt; 6      Flame 105.8 bcde</span></span>
+<span id="cb17-183"><a href="#cb17-183" tabindex="-1"></a><span class="co">#&gt; 7       Envy 108.3  cde</span></span>
+<span id="cb17-184"><a href="#cb17-184" tabindex="-1"></a><span class="co">#&gt; 8  Brilliant 108.8   de</span></span>
+<span id="cb17-185"><a href="#cb17-185" tabindex="-1"></a><span class="co">#&gt; 9      Sirus 110.0   de</span></span>
+<span id="cb17-186"><a href="#cb17-186" tabindex="-1"></a><span class="co">#&gt; 10    Wanaka 114.2  def</span></span>
+<span id="cb17-187"><a href="#cb17-187" tabindex="-1"></a><span class="co">#&gt; 11    WHT951 115.0  def</span></span>
+<span id="cb17-188"><a href="#cb17-188" tabindex="-1"></a><span class="co">#&gt; 12    Victor 115.4  def</span></span>
+<span id="cb17-189"><a href="#cb17-189" tabindex="-1"></a><span class="co">#&gt; 13    Encore 119.6 defg</span></span>
+<span id="cb17-190"><a href="#cb17-190" tabindex="-1"></a><span class="co">#&gt; 14   WWT1695 121.7  efg</span></span>
+<span id="cb17-191"><a href="#cb17-191" tabindex="-1"></a><span class="co">#&gt; 15    CAW733 127.5   fg</span></span>
+<span id="cb17-192"><a href="#cb17-192" tabindex="-1"></a><span class="co">#&gt; 16    CAW722 134.6    g</span></span>
+<span id="cb17-193"><a href="#cb17-193" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb17-194"><a href="#cb17-194" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb17-195"><a href="#cb17-195" tabindex="-1"></a><span class="co">#&gt; [[5]]</span></span>
+<span id="cb17-196"><a href="#cb17-196" tabindex="-1"></a><span class="co">#&gt; [[5]][[1]]</span></span>
+<span id="cb17-197"><a href="#cb17-197" tabindex="-1"></a><span class="co">#&gt;         Item Value Rank</span></span>
+<span id="cb17-198"><a href="#cb17-198" tabindex="-1"></a><span class="co">#&gt; 1    Monarch 13.10    a</span></span>
+<span id="cb17-199"><a href="#cb17-199" tabindex="-1"></a><span class="co">#&gt; 2     CAW722 13.20   ab</span></span>
+<span id="cb17-200"><a href="#cb17-200" tabindex="-1"></a><span class="co">#&gt; 3    Resolve 13.35  abc</span></span>
+<span id="cb17-201"><a href="#cb17-201" tabindex="-1"></a><span class="co">#&gt; 4      Sirus 13.35  abc</span></span>
+<span id="cb17-202"><a href="#cb17-202" tabindex="-1"></a><span class="co">#&gt; 5       Envy 13.40   bc</span></span>
+<span id="cb17-203"><a href="#cb17-203" tabindex="-1"></a><span class="co">#&gt; 6     WHT951 13.40   bc</span></span>
+<span id="cb17-204"><a href="#cb17-204" tabindex="-1"></a><span class="co">#&gt; 7  Brilliant 13.45   bc</span></span>
+<span id="cb17-205"><a href="#cb17-205" tabindex="-1"></a><span class="co">#&gt; 8     Victor 13.50    c</span></span>
+<span id="cb17-206"><a href="#cb17-206" tabindex="-1"></a><span class="co">#&gt; 9     Encore 13.55    c</span></span>
+<span id="cb17-207"><a href="#cb17-207" tabindex="-1"></a><span class="co">#&gt; 10    Nelson 13.55    c</span></span>
+<span id="cb17-208"><a href="#cb17-208" tabindex="-1"></a><span class="co">#&gt; 11     Flame 13.58    c</span></span>
+<span id="cb17-209"><a href="#cb17-209" tabindex="-1"></a><span class="co">#&gt; 12     Blaze 13.60    c</span></span>
+<span id="cb17-210"><a href="#cb17-210" tabindex="-1"></a><span class="co">#&gt; 13    Excess 13.60    c</span></span>
+<span id="cb17-211"><a href="#cb17-211" tabindex="-1"></a><span class="co">#&gt; 14   WWT1695 13.95    d</span></span>
+<span id="cb17-212"><a href="#cb17-212" tabindex="-1"></a><span class="co">#&gt; 15    CAW733 14.05   de</span></span>
+<span id="cb17-213"><a href="#cb17-213" tabindex="-1"></a><span class="co">#&gt; 16    Wanaka 14.25    e</span></span>
+<span id="cb17-214"><a href="#cb17-214" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb17-215"><a href="#cb17-215" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb17-216"><a href="#cb17-216" tabindex="-1"></a><span class="co">#&gt; [[6]]</span></span>
+<span id="cb17-217"><a href="#cb17-217" tabindex="-1"></a><span class="co">#&gt; list()</span></span>
+<span id="cb17-218"><a href="#cb17-218" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb17-219"><a href="#cb17-219" tabindex="-1"></a><span class="co">#&gt; [[7]]</span></span>
+<span id="cb17-220"><a href="#cb17-220" tabindex="-1"></a><span class="co">#&gt; [[7]][[1]]</span></span>
+<span id="cb17-221"><a href="#cb17-221" tabindex="-1"></a><span class="co">#&gt;         Item Value Rank</span></span>
+<span id="cb17-222"><a href="#cb17-222" tabindex="-1"></a><span class="co">#&gt; 1      Sirus 17.28    a</span></span>
+<span id="cb17-223"><a href="#cb17-223" tabindex="-1"></a><span class="co">#&gt; 2     CAW722 17.93    b</span></span>
+<span id="cb17-224"><a href="#cb17-224" tabindex="-1"></a><span class="co">#&gt; 3  Brilliant 17.95   bc</span></span>
+<span id="cb17-225"><a href="#cb17-225" tabindex="-1"></a><span class="co">#&gt; 4    Monarch 17.98   bc</span></span>
+<span id="cb17-226"><a href="#cb17-226" tabindex="-1"></a><span class="co">#&gt; 5     Excess 18.00   bc</span></span>
+<span id="cb17-227"><a href="#cb17-227" tabindex="-1"></a><span class="co">#&gt; 6     Victor 18.00   bc</span></span>
+<span id="cb17-228"><a href="#cb17-228" tabindex="-1"></a><span class="co">#&gt; 7       Envy 18.05   bc</span></span>
+<span id="cb17-229"><a href="#cb17-229" tabindex="-1"></a><span class="co">#&gt; 8     CAW733 18.13   bc</span></span>
+<span id="cb17-230"><a href="#cb17-230" tabindex="-1"></a><span class="co">#&gt; 9    Resolve 18.20   bc</span></span>
+<span id="cb17-231"><a href="#cb17-231" tabindex="-1"></a><span class="co">#&gt; 10    Encore 18.25   bc</span></span>
+<span id="cb17-232"><a href="#cb17-232" tabindex="-1"></a><span class="co">#&gt; 11    WHT951 18.28   bc</span></span>
+<span id="cb17-233"><a href="#cb17-233" tabindex="-1"></a><span class="co">#&gt; 12   WWT1695 18.33   bc</span></span>
+<span id="cb17-234"><a href="#cb17-234" tabindex="-1"></a><span class="co">#&gt; 13    Nelson 18.35  bcd</span></span>
+<span id="cb17-235"><a href="#cb17-235" tabindex="-1"></a><span class="co">#&gt; 14     Flame 18.38   cd</span></span>
+<span id="cb17-236"><a href="#cb17-236" tabindex="-1"></a><span class="co">#&gt; 15     Blaze 18.78   de</span></span>
+<span id="cb17-237"><a href="#cb17-237" tabindex="-1"></a><span class="co">#&gt; 16    Wanaka 18.98    e</span></span>
+<span id="cb17-238"><a href="#cb17-238" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb17-239"><a href="#cb17-239" tabindex="-1"></a><span class="co">#&gt; [[7]][[2]]</span></span>
+<span id="cb17-240"><a href="#cb17-240" tabindex="-1"></a><span class="co">#&gt;         Item Value Rank</span></span>
+<span id="cb17-241"><a href="#cb17-241" tabindex="-1"></a><span class="co">#&gt; 1    Resolve 10.20    a</span></span>
+<span id="cb17-242"><a href="#cb17-242" tabindex="-1"></a><span class="co">#&gt; 2     Excess 10.47   ab</span></span>
+<span id="cb17-243"><a href="#cb17-243" tabindex="-1"></a><span class="co">#&gt; 3  Brilliant 10.55   ab</span></span>
+<span id="cb17-244"><a href="#cb17-244" tabindex="-1"></a><span class="co">#&gt; 4     Nelson 10.55   ab</span></span>
+<span id="cb17-245"><a href="#cb17-245" tabindex="-1"></a><span class="co">#&gt; 5     Wanaka 10.75  abc</span></span>
+<span id="cb17-246"><a href="#cb17-246" tabindex="-1"></a><span class="co">#&gt; 6      Flame 10.92  bcd</span></span>
+<span id="cb17-247"><a href="#cb17-247" tabindex="-1"></a><span class="co">#&gt; 7     Encore 11.21  cde</span></span>
+<span id="cb17-248"><a href="#cb17-248" tabindex="-1"></a><span class="co">#&gt; 8     Victor 11.28 cdef</span></span>
+<span id="cb17-249"><a href="#cb17-249" tabindex="-1"></a><span class="co">#&gt; 9    Monarch 11.29 cdef</span></span>
+<span id="cb17-250"><a href="#cb17-250" tabindex="-1"></a><span class="co">#&gt; 10   WWT1695 11.45 defg</span></span>
+<span id="cb17-251"><a href="#cb17-251" tabindex="-1"></a><span class="co">#&gt; 11     Sirus 11.45 defg</span></span>
+<span id="cb17-252"><a href="#cb17-252" tabindex="-1"></a><span class="co">#&gt; 12     Blaze 11.66  efg</span></span>
+<span id="cb17-253"><a href="#cb17-253" tabindex="-1"></a><span class="co">#&gt; 13      Envy 11.76  efg</span></span>
+<span id="cb17-254"><a href="#cb17-254" tabindex="-1"></a><span class="co">#&gt; 14    CAW733 11.87   fg</span></span>
+<span id="cb17-255"><a href="#cb17-255" tabindex="-1"></a><span class="co">#&gt; 15    CAW722 12.02    g</span></span>
+<span id="cb17-256"><a href="#cb17-256" tabindex="-1"></a><span class="co">#&gt; 16    WHT951 12.80    h</span></span></code></pre></div>
+</div>
+<div id="displaying-genstat-graphics" class="section level1">
+<h1>Displaying Genstat Graphics</h1>
+<p>If Genstat outputs a <strong>PNG image</strong>, it will be displayed
+directly in the output document. These images are saved locally with
+filenames like ‘img_1.png’, ‘img_2.png’, etc.</p>
+<p>Example:</p>
+<div class="sourceCode" id="cb18"><pre class="sourceCode gs"><code class="sourceCode glsl"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a>DGRAPH <span class="op">!(</span><span class="dv">1</span><span class="op">,</span><span class="dv">2</span><span class="op">,</span><span class="dv">3</span><span class="op">,</span><span class="dv">4</span><span class="op">,</span><span class="dv">5</span><span class="op">);</span> <span class="op">!(</span><span class="dv">10</span><span class="op">,</span><span class="dv">15</span><span class="op">,</span><span class="dv">7</span><span class="op">,</span><span class="dv">20</span><span class="op">,</span><span class="dv">12</span><span class="op">)</span></span></code></pre></div>
+<p><img role="img" src="data:image/png;base64,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" /></p>
+<div class="sourceCode" id="cb19"><pre class="sourceCode gs"><code class="sourceCode glsl"><span id="cb19-1"><a href="#cb19-1" tabindex="-1"></a>DGRAPH <span class="op">!(</span><span class="dv">1</span><span class="op">...</span><span class="fu">9</span><span class="op">);</span> <span class="op">!(</span><span class="dv">1</span><span class="op">...</span><span class="fu">9</span><span class="op">)</span></span></code></pre></div>
+<p><img role="img" src="data:image/png;base64,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3d3byWC5XN7d3f39999XV1cGFwAAcGx2csevoheUcw2KZPDG46fTqVgA7E2/37+9vb24uLi+vm61Wp1Op91ut9v/v5+uVqvVarVcLotpCEYWAABwnHYyviBJkuFwuM6QgW63O51O97bsIkCpGGXw9PT08PBwd3f37x93d3cPDw9PT0+j0ejDy68AAMCh2+GKYt1udz6fF4MLnt/CoLjNgVIA1Oj29jbLstlslmXZYrEofljc2nA8HpuDAADAMdv5CuRFNUiSpJoMzD4AGqLf75txAAAAz+28F5Q0AgAAADgUu7p/AQAAAHC49AIAAAAg0gsAAACASC8AAAAAIr0AAAAAiPQCAAAAINILAAAAgEgvAAAAACK9AAAAAIj0AgAAACDSCwAAAIBILwAAAAAivQAAAACI9AIAAAAg0gsAAACASC8AAAAAIr0AAAAAiPQCAAAAINILAAAAgEgvAAAAACK9AAAAAIj0AgAAACDSCwAAAIBILwAAAAAivQAAAACI9AIAAAAg0gsAAACASC8AAAAAIr0AAAAAiPQCAAAAINILAAAAgEgvAAAAACK9AAAAAIj0AgAAACDSCwAAAIBILwAAAAAivQAAAACI9AIAAAAg0gsAAACASC8AAAAAIr0AAAAAiPQCAAAAINILAAAAgEgvAAAAACK9AAAAAIj0AgAAACDSCwAAAIBILwAAAAAivQAAAACI9AIAAAAg0gsAAACASC8AAAAAIr0AAAAAiPQCAAAAINILAAAAgEgvAAAAACK9AAAAAIj0AgAAACDSCwAAAIBILwAAAAAivQAAAACI9AIAAAAg0gsAAACASC8AAAAAIr0AAAAAiPQCAAAAINILAAAAgEgvAAAAACK9AAAAAIj0AgAAACDSCwAAAIBILwAAAAAivQAAAACI9AIAAAAg0gsAAACASC8AAAAAIr0AAAAAiPQCAAAAINILAAAAgEgvAAAAACK9AAAAAIj0AgAAACDSCwAAAIBILwAAAAAivQAAAACI9AIAAAAg0gsAAACASC8AAAAAIr0AAAAAiPQCAAAAINILAAAAgEgvAAAAACK9AAAAAIj0AgAAACDSCwAAAIBILwAAAAAivQAAAACI9AIAAAAg0gsAAACASC8AAAAAIr0AAAAAiPQCAAAAINILAAAAgEgvAAAAACK9AAAAAIj0AgAAACDSCwAAAIBILwAA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" /></p>
+</div>
+<div id="echo-only-code-blocks" class="section level1">
+<h1>Echo-only Code Blocks</h1>
+<ol style="list-style-type: decimal">
+<li>If you want to display the Genstat code <strong>without
+evaluating</strong> it:</li>
+</ol>
+<p>{gs, eval=FALSE}</p>
+<p>Example:</p>
+<div class="sourceCode" id="cb20"><pre class="sourceCode gs"><code class="sourceCode glsl"><span id="cb20-1"><a href="#cb20-1" tabindex="-1"></a>PRINT &#39;This should <span class="bu">not</span> run<span class="op">.</span>&#39;</span></code></pre></div>
+<ol start="2" style="list-style-type: decimal">
+<li>By default, the ‘gs.engine’ <strong>does</strong> show the Genstat
+commands submitted in each chunk.</li>
+</ol>
+<p>To <strong>hide Genstat code lines</strong> in the rendered output,
+use the ‘echo = FALSE’ option in the chunk header:</p>
+<p>{gs, echo=FALSE}</p>
+<p>Example:</p>
+<p><em><em>Loading Spreadsheet File</em></em></p>
+<p>Catalogue of file WheatTrials.xlsx</p>
+<p>Sheet Title: Trial A1 Description: Data read from D:.xlsx [Trial
+A1]A2:N53 Sheet Type: vector Index Type Nval Name</p>
+<table>
+<thead>
+<tr class="header">
+<th>Index</th>
+<th>Type</th>
+<th>Nval</th>
+<th>Name</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>factor</td>
+<td>52</td>
+<td>Entry</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>factor</td>
+<td>52</td>
+<td>Plot</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>factor</td>
+<td>52</td>
+<td>Row</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td>factor</td>
+<td>52</td>
+<td>Column</td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td>factor</td>
+<td>52</td>
+<td>Block</td>
+</tr>
+<tr class="even">
+<td>6</td>
+<td>factor</td>
+<td>52</td>
+<td>Rep</td>
+</tr>
+<tr class="odd">
+<td>7</td>
+<td>factor</td>
+<td>52</td>
+<td>Cultivar</td>
+</tr>
+<tr class="even">
+<td>8</td>
+<td>variate</td>
+<td>52</td>
+<td>Mean_Population_m2</td>
+</tr>
+<tr class="odd">
+<td>9</td>
+<td>variate</td>
+<td>52</td>
+<td>Plot_Size_m2</td>
+</tr>
+<tr class="even">
+<td>10</td>
+<td>variate</td>
+<td>52</td>
+<td>Plot_Yield_kg</td>
+</tr>
+<tr class="odd">
+<td>11</td>
+<td>variate</td>
+<td>52</td>
+<td>Harvest_Moisture</td>
+</tr>
+<tr class="even">
+<td>12</td>
+<td>variate</td>
+<td>52</td>
+<td>Yield_14%_t_ha_adj</td>
+</tr>
+</tbody>
+</table>
+<p>This will only include the Genstat result or tables in the final
+document output.</p>
+<p>This setting behaves similarly to R Markdown’s native echo = TRUE
+option for R code chunks.</p>
+</div>
+<div id="troubleshooting" class="section level1">
+<h1>Troubleshooting</h1>
+<p>If you experience connection issues:</p>
+<ol style="list-style-type: decimal">
+<li><p>Ensure your Genstat socket server is running and listening on the
+correct port.</p></li>
+<li><p>Test using ‘telnet <host> <port>’ or similar tools.</p></li>
+</ol>
+</div>
+<div id="session-info" class="section level1">
+<h1>Session Info</h1>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" tabindex="-1"></a><span class="fu">sessionInfo</span>()</span>
+<span id="cb21-2"><a href="#cb21-2" tabindex="-1"></a><span class="co">#&gt; R version 4.4.1 (2024-06-14 ucrt)</span></span>
+<span id="cb21-3"><a href="#cb21-3" tabindex="-1"></a><span class="co">#&gt; Platform: x86_64-w64-mingw32/x64</span></span>
+<span id="cb21-4"><a href="#cb21-4" tabindex="-1"></a><span class="co">#&gt; Running under: Windows 10 x64 (build 19045)</span></span>
+<span id="cb21-5"><a href="#cb21-5" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb21-6"><a href="#cb21-6" tabindex="-1"></a><span class="co">#&gt; Matrix products: default</span></span>
+<span id="cb21-7"><a href="#cb21-7" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb21-8"><a href="#cb21-8" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb21-9"><a href="#cb21-9" tabindex="-1"></a><span class="co">#&gt; locale:</span></span>
+<span id="cb21-10"><a href="#cb21-10" tabindex="-1"></a><span class="co">#&gt; [1] LC_COLLATE=Chinese (Simplified)_China.utf8 </span></span>
+<span id="cb21-11"><a href="#cb21-11" tabindex="-1"></a><span class="co">#&gt; [2] LC_CTYPE=Chinese (Simplified)_China.utf8   </span></span>
+<span id="cb21-12"><a href="#cb21-12" tabindex="-1"></a><span class="co">#&gt; [3] LC_MONETARY=Chinese (Simplified)_China.utf8</span></span>
+<span id="cb21-13"><a href="#cb21-13" tabindex="-1"></a><span class="co">#&gt; [4] LC_NUMERIC=C                               </span></span>
+<span id="cb21-14"><a href="#cb21-14" tabindex="-1"></a><span class="co">#&gt; [5] LC_TIME=Chinese (Simplified)_China.utf8    </span></span>
+<span id="cb21-15"><a href="#cb21-15" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb21-16"><a href="#cb21-16" tabindex="-1"></a><span class="co">#&gt; time zone: Pacific/Auckland</span></span>
+<span id="cb21-17"><a href="#cb21-17" tabindex="-1"></a><span class="co">#&gt; tzcode source: internal</span></span>
+<span id="cb21-18"><a href="#cb21-18" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb21-19"><a href="#cb21-19" tabindex="-1"></a><span class="co">#&gt; attached base packages:</span></span>
+<span id="cb21-20"><a href="#cb21-20" tabindex="-1"></a><span class="co">#&gt; [1] stats     graphics  grDevices utils     datasets  methods   base     </span></span>
+<span id="cb21-21"><a href="#cb21-21" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb21-22"><a href="#cb21-22" tabindex="-1"></a><span class="co">#&gt; other attached packages:</span></span>
+<span id="cb21-23"><a href="#cb21-23" tabindex="-1"></a><span class="co">#&gt; [1] gsengine_1.0</span></span>
+<span id="cb21-24"><a href="#cb21-24" tabindex="-1"></a><span class="co">#&gt; </span></span>
+<span id="cb21-25"><a href="#cb21-25" tabindex="-1"></a><span class="co">#&gt; loaded via a namespace (and not attached):</span></span>
+<span id="cb21-26"><a href="#cb21-26" tabindex="-1"></a><span class="co">#&gt;  [1] digest_0.6.37     R6_2.6.1          base64enc_0.1-3   fastmap_1.2.0    </span></span>
+<span id="cb21-27"><a href="#cb21-27" tabindex="-1"></a><span class="co">#&gt;  [5] xfun_0.52         cachem_1.1.0      knitr_1.50        htmltools_0.5.8.1</span></span>
+<span id="cb21-28"><a href="#cb21-28" tabindex="-1"></a><span class="co">#&gt;  [9] rmarkdown_2.29    lifecycle_1.0.4   cli_3.6.3         sass_0.4.9       </span></span>
+<span id="cb21-29"><a href="#cb21-29" tabindex="-1"></a><span class="co">#&gt; [13] jquerylib_0.1.4   compiler_4.4.1    rstudioapi_0.17.1 tools_4.4.1      </span></span>
+<span id="cb21-30"><a href="#cb21-30" tabindex="-1"></a><span class="co">#&gt; [17] evaluate_1.0.3    bslib_0.9.0       yaml_2.3.10       rlang_1.1.4      </span></span>
+<span id="cb21-31"><a href="#cb21-31" tabindex="-1"></a><span class="co">#&gt; [21] jsonlite_1.8.9</span></span></code></pre></div>
+<div class="sourceCode" id="cb22"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb22-1"><a href="#cb22-1" tabindex="-1"></a><span class="co">#devtools::build_rmd(&quot;vignettes/gsengine.Rmd&quot;)</span></span>
+<span id="cb22-2"><a href="#cb22-2" tabindex="-1"></a><span class="co">#browseVignettes(package = &quot;gsengine&quot;)</span></span></code></pre></div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>

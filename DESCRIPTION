@@ -1,0 +1,14 @@
+Package: gsengine
+Type: Package
+Title: Genstat Engine for knitr
+Version: 1.0-1
+Author: Yuxiao Wang
+Maintainer: Yuxiao <wany441@aucklanduni.ac.nz>
+Description: Provides a custom knitr engine to process Genstat code via socket connection.
+Depends: R (>= 3.5.0)
+Imports: base64enc, knitr
+License: GPL-3
+Encoding: UTF-8
+LazyData: true
+Suggests: rmarkdown
+VignetteBuilder: knitr
