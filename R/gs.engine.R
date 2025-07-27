@@ -1,5 +1,3 @@
-library(base64enc)
-
 #' Genstat Socket Engine for knitr
 #'
 #' This function creates a custom knitr engine for executing Genstat code by connecting 
@@ -60,6 +58,7 @@ gs.engine <- function (host = Sys.getenv("GENSTAT_HOST", "localhost"),
       }
       
       make_table_md <- function(header, df) {
+        browser()
         md <- c(
           paste("|", paste(header, collapse = " | "), "|"),
           paste0("|", paste(rep("------", length(header)), collapse = "|"), "|"),
@@ -121,6 +120,7 @@ gs.engine <- function (host = Sys.getenv("GENSTAT_HOST", "localhost"),
         
         ## --- Complex Tables ---
         if (grepl("^Sheet (Title|Type):", l)) {
+          browser()
           sheet_metadata <- l
           while (length(sheet_metadata) < 4) {
             l <- nextLine()

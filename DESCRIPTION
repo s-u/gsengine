@@ -2,8 +2,12 @@ Package: gsengine
 Type: Package
 Title: Genstat Engine for knitr
 Version: 1.0-1
-Author: Yuxiao Wang
-Maintainer: Yuxiao <wany441@aucklanduni.ac.nz>
+Authors@R: 
+    c(
+        person("Yuxiao", "Wang", role = "aut"),
+        person("Simon", "Urbanek", email = "s.urbanek@auckland.ac.nz", role = "aut"),
+        person("James", "Curran", email = "j.curran@auckland.ac.nz", role = c("aut", "cre"))
+    )
 Description: Provides a custom knitr engine to process Genstat code via socket connection.
 Depends: R (>= 3.5.0)
 Imports: base64enc, knitr

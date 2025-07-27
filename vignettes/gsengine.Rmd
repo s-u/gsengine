@@ -41,7 +41,7 @@ It assumes a Genstat server is already running and accessible over a socket conn
 # Setting up the connection
 You can configure the Genstat server host and port via environment variables:
 ```{r}
-Sys.setenv(GENSTAT_HOST = "localhost")
+Sys.setenv(GENSTAT_HOST = "sc389508.UoA.auckland.ac.nz")
 Sys.setenv(GENSTAT_PORT = "8085")
 ```
 
