@@ -20,8 +20,7 @@
 #' @export
 #'
 gs.engine <- function (host = Sys.getenv("GENSTAT_HOST", "localhost"),
-                       port = as.integer(Sys.getenv("GENSTAT_PORT", "8085"))) 
-{
+                       port = as.integer(Sys.getenv("GENSTAT_PORT", "8085"))) {
   local({
     # Establish a socket connection to the Genstat server
     connection <- socketConnection(host = host, port = port, blocking = TRUE, open = "r+")
