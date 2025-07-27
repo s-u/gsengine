@@ -57,7 +57,6 @@ gs.engine <- function (host = Sys.getenv("GENSTAT_HOST", "localhost"),
       }
       
       make_table_md <- function(header, df) {
-        browser()
         md <- c(
           paste("|", paste(header, collapse = " | "), "|"),
           paste0("|", paste(rep("------", length(header)), collapse = "|"), "|"),
@@ -119,13 +118,17 @@ gs.engine <- function (host = Sys.getenv("GENSTAT_HOST", "localhost"),
         
         ## --- Complex Tables ---
         if (grepl("^Sheet (Title|Type):", l)) {
-          browser()
           sheet_metadata <- l
           while (length(sheet_metadata) < 4) {
             l <- nextLine()
             if (is.null(l)) break
             sheet_metadata <- c(sheet_metadata, l)
           }
+          
+          ## NOTE: This seems very arbitrary. Ask David whether there will always
+          ## be 4 rows for the metadata
+          l <- nextLine()
+          header <- unlist(strsplit(trimws(l, which = "both"), split = "\\s+"))
           
           table_rows <- character()
           l <- nextLine()
@@ -134,7 +137,6 @@ gs.engine <- function (host = Sys.getenv("GENSTAT_HOST", "localhost"),
             l <- nextLine()
           }
           
-          header <- c("Index", "Type", "Nval", "Name")
           df <- do.call(rbind, lapply(table_rows, function(row) {
             parts <- unlist(strsplit(trimws(row), "\\s+"))
             data.frame(Index = parts[1], Type = parts[2], Nval = parts[3], Name = paste(parts[-(1:3)], collapse = " "))
