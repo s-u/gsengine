@@ -119,14 +119,25 @@ gs.engine <- function (host = Sys.getenv("GENSTAT_HOST", "localhost"),
         ## --- Complex Tables ---
         if (grepl("^Sheet (Title|Type):", l)) {
           sheet_metadata <- l
-          while (length(sheet_metadata) < 4) {
+          #while (length(sheet_metadata) < 4) {
+          #  l <- nextLine()
+          #  if (is.null(l)) break
+          #  sheet_metadata <- c(sheet_metadata, l)
+          #}
+          repeat { ## do this while l is not either null or contains Sheet Type:
             l <- nextLine()
-            if (is.null(l)) break
+            if(is.null(l)){
+              break
+            }
             sheet_metadata <- c(sheet_metadata, l)
+            if(grepl("^Sheet Type:", l)){
+              break
+            }
           }
           
           ## NOTE: This seems very arbitrary. Ask David whether there will always
           ## be 4 rows for the metadata
+          browser()
           l <- nextLine()
           header <- unlist(strsplit(trimws(l, which = "both"), split = "\\s+"))
           

@@ -103,6 +103,39 @@ Example:
 DGRAPH !(1,2,3,4,5); !(10,15,7,20,12)
 ```
 
+# Importing data into Genstat
+Importing data into Genstat can often have a side-effect in that messages may be returned. Whilst we can clearly just
+echo the text, it might be useful to, for example, turn table data into tables. The messages (and output) are controlled 
+by the a `PRINT` option, which can be one of `CATALOGUE`, `SUMMARY`, or `*`. If not specified, then the default is `[PRINT=CATALOGUE]`.
+*Note*: these options may be shortened to a single character.
+
+Let's look at the output we get from each option
+
+```{gs}
+IMPORT '%DATA%/Iris.gsh'
+```
+```{gs}
+IMPORT [PRINT=C] '%DATA%/AbaloneAge.gsh'
+```
+
+```{gs}
+IMPORT [PRINT=SUMMARY] '%DATA%/Iris.gsh'
+```
+
+```{gs}
+IMPORT [PRINT=*] '%DATA%/Iris.gsh'
+```
+As we can see, there are three (or four depending on how you look at it) possibilities. The last option `[PRINT=*]` 
+suppresses output. `[PRINT=CATALOG]` gives a table summary which gives the order of the variables, the variable type,
+the number of observations for each variable, and the variable name. `[PRINT=SUMMARY]` gives a simple numerical summary (minimum, mean, maximum, $n$, $n_{missing}$)
+of each variable of type `variate`, and of each `factor` ($n$, $n_{missing}$, levels).
+
+```{gs,store_complex_tables=TRUE, store_simple_tables=TRUE}
+IMPORT [PRINT=SUMMARY] '%DATA%/Iris.gsh'
+```
+
+We might regard 
+
 
 
 # Warning and Table Formatting
