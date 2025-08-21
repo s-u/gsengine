@@ -9,6 +9,9 @@
 #'             Defaults to `"localhost"` or the environment variable `GENSTAT_HOST`.
 #' @param port An integer specifying the port number to connect to on the Genstat server. 
 #'             Defaults to `8085` or the environment variable `GENSTAT_PORT`.
+#' @param mode A character string specifying either `"text"` or `"html"`. The default is currently "`text`" 
+#' but will likely switch to `"html` in the future. This switch determines what kind of output is returned from 
+#' Genstat. HTML should be easier to deal with.
 #'
 #' @return A function that can be registered as a knitr engine (e.g., via `knitr::knit_engines$set(gs = gs.engine())`)
 #'
@@ -20,7 +23,8 @@
 #' @export
 #'
 gs.engine <- function (host = Sys.getenv("GENSTAT_HOST", "localhost"),
-                       port = as.integer(Sys.getenv("GENSTAT_PORT", "8085"))) {
+                       port = as.integer(Sys.getenv("GENSTAT_PORT", "8085")),
+                       mode = c("text", "html")) {
   local({
     # Establish a socket connection to the Genstat server
     connection <- socketConnection(host = host, port = port, blocking = TRUE, open = "r+")
