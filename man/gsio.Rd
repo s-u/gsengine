@@ -16,7 +16,7 @@ gsio.send(io, ...)
 
 gsio.recv(io, wait = TRUE)
 
-gsio.msg(io, ..., all = TRUE)
+gsio.msg(io, ..., all = TRUE, wait = TRUE)
 
 \method{close}{gsio}(con, ...)
 
@@ -77,7 +77,10 @@ to call \code{gsio.greeting()} on the resulting connection to
 start the communication.
 
 \code{gsio.msg} sends a message to the Messenger and waits for a response.
-Any unmatched, named arguments in \dots will be ignored.
+Any unmatched, named arguments in \dots will be ignored. As a special case,
+passing \code{NULL} will tell \code{gsio.msg} to not send any message,
+but still process any pending replies (useful with \code{wait=FALSE} to
+check for such condition).
 
 \code{gsio.greeting} receives a greeting response from the Messenger,
 i.e., the first response after connecting.
