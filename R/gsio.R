@@ -12,7 +12,10 @@
 #' start the communication.
 #'
 #' \code{gsio.msg} sends a message to the Messenger and waits for a response.
-#' Any unmatched, named arguments in \dots will be ignored.
+#' Any unmatched, named arguments in \dots will be ignored. As a special case,
+#' passing \code{NULL} will tell \code{gsio.msg} to not send any message,
+#' but still process any pending replies (useful with \code{wait=FALSE} to
+#' check for such condition).
 #'
 #' \code{gsio.greeting} receives a greeting response from the Messenger,
 #' i.e., the first response after connecting.
@@ -140,14 +143,15 @@ gsio.recv <- function(io, wait=TRUE) {
 #'
 #' @rdname gsio
 #' @export
-gsio.msg <- function(io, ..., all=TRUE) {
+gsio.msg <- function(io, ..., all=TRUE, wait=TRUE) {
     l <- list(...)
     if (!is.null(names(l))) l <- l[names(l) == ""]
     if (!length(l)) stop("Nothing to send")
-    do.call(gsio.send, c(list(io), l))
-    if (!isTRUE(all)) return(gsio.recv(io, wait=TRUE))
+    if (!identical(l, list(NULL)))
+        do.call(gsio.send, c(list(io), l))
+    if (!isTRUE(all)) return(gsio.recv(io, wait=wait))
     l <- list()
-    while(length(res <- gsio.recv(io, wait=TRUE))) {
+    while(length(res <- gsio.recv(io, wait=wait))) {
         if (identical(res$cmd, "STAT"))
             break
         l <- c(l, list(res))
