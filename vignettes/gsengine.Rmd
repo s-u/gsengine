@@ -1,13 +1,13 @@
 ---
-title: "Using gs.engine(): Genstat Socket Engine"
-author: "Yuxiao Wang"
+title: "Using GSengine()"
+author: "Yuxiao Wang, James Curran"
 date: "`r Sys.Date()`"
 output: 
   rmarkdown::html_vignette:
   toc: true
   fig_caption: true
 vignette: >
-  %\VignetteIndexEntry{Using gs.engine(): Genstat Socket Engine}
+  %\VignetteIndexEntry{Using GSengine()}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -43,7 +43,7 @@ You can configure the Genstat server host and port via environment variables:
 ```{r}
 Sys.setenv(GENSTAT_HOST = "sc389508.UoA.auckland.ac.nz")
 Sys.setenv(GENSTAT_PORT = "8085")
-knitr::knit_engines$set(gs = gsengine::gs.engine())
+knitr::knit_engines$set(gs = gsengine:::GSengine())
 ```
 
 
