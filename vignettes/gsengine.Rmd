@@ -24,9 +24,6 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
-
-library(gsengine)
-knitr::knit_engines$set(gs = gsengine::gs.engine())
 ```
 
 
@@ -133,22 +130,6 @@ ANOVA [FPROB=yes; PSE=LSD] Yield_14%_t_ha_adj
 AMCOMPARISON Cultivar
 ```
 
-
-You can enable **table storage** by setting options in the chunk header:
-
-    {gs, store_complex_tables=TRUE, store_simple_tables=TRUE}
-  
-Tables will be available as lists in global variables:
-  
-    complex_tables_all_chunks
-  
-    simple_tables_all_chunks
-  
-Example:
-```{r}
-complex_tables_all_chunks
-simple_tables_all_chunks
-```
 
 
 
