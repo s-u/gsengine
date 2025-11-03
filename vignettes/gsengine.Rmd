@@ -12,6 +12,8 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 ---
 
+<link rel="stylesheet" type="text/css" href="Genstat.css">
+
 ```{css, echo = FALSE}
 img {
     max-width: 50%;  
@@ -145,23 +147,19 @@ To **hide Genstat code lines** in the rendered output, use the 'echo = FALSE' op
 ```{gs, echo=FALSE}
 ```
 ````
-    Example:
-    ```{gs, echo=FALSE}
-    PRINT 'This should run.'
-    ```
 
-    This will only include the Genstat result or tables in the final document output.
+Example:
+````{r eval=FALSE, highlight=FALSE}
+```{gs, echo=FALSE}
+PRINT 'This should run.'
+```
+````
+This will only include the Genstat result or tables in the final document output.
 
-    This setting behaves similarly to R Markdown’s native echo = TRUE option for R code chunks.
-
-
-
-
-
-
+This setting behaves similarly to R Markdown’s native `echo = TRUE` option for R code chunks.
 
 # Warning and Table Formatting
-The 'gs.engine' will automatically:
+The `gs.engine` will automatically:
 
 1) **Highlight Genstat warnings/Faults** in red.
 
