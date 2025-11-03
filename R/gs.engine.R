@@ -57,6 +57,7 @@ gs.engine <- function (host = Sys.getenv("GENSTAT_HOST", "localhost"),
 }
 
 ## This function tests to see if the vector consists of nothing but PRE and SPAN
+#' @import xml2
 isEmpty <- function(output){
   # combine into a single string for parsing
   html_str <- paste(output, collapse = "")
@@ -75,6 +76,47 @@ isEmpty <- function(output){
   }
 }
 
+#' Function to strip stuff that looks like this:<SPAN CLASS=GenVerbatim><PRE></PRE></SPAN>
+#' from the output.
+stripGenVerbatim <- function(output){
+  ## Parse the HTML from a string
+  html_str <- paste(output, collapse = "")
+  doc <- read_html(html_str, options = "RECOVER")
+  
+  # Remove spans that are exactly <span class="GenVerbatim"><pre></pre></span>
+  empty_spans <- xml_find_all(
+    doc,
+    "//span[
+       translate(@class,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz')='genverbatim'
+       and count(pre)=1
+       and normalize-space(pre)=''
+     ]"
+  )
+  
+  if (length(empty_spans) > 0) {
+    xml_remove(empty_spans)
+  }
+  
+  # Also remove any standalone empty <pre> blocks
+  xml_remove(xml_find_all(doc, '//pre[not(node()) or normalize-space(.)=""]'))
+  
+  # Get the main content inside <body> if it exists
+  body_node <- xml_find_first(doc, "//body")
+  if (!is.na(body_node)) {
+    # Return only the serialized children of <body>
+    cleaned_html <- paste0(vapply(xml_children(body_node), as.character, ""), collapse = "")
+  } else {
+    # Fallback: use full document minus doctype
+    cleaned_html <- as.character(doc)
+    cleaned_html <- sub("(?is)^<!DOCTYPE[^>]*>", "", cleaned_html, perl = TRUE)
+  }
+  
+  # Trim leading/trailing whitespace
+  cleaned_html <- trimws(cleaned_html)
+  
+  cleaned_html
+}
+
 ## implement this function to handle the GS output
 processOutput <- function(msg, io) {
     ## custom handler for experiments
@@ -88,7 +130,7 @@ processOutput <- function(msg, io) {
                     .GlobalEnv$processGenstatHtmlOutput(o$content, io)
                 else
                   if(!isEmpty(o$content)){
-                    o$content
+                    stripGenVerbatim(o$content)
                   }
             } else if (o$type == "GRAPH") {
                 ## save graphs as files

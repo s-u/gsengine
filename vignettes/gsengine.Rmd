@@ -39,42 +39,52 @@ It assumes:
 ## Using `gsengine` with Genstat on your own machine
 If you have Genstat installed locally, i.e. on the machine that you are writing your R Markdown document, then you can create a `knitr` engine for interacting with Genstat by using the `gs.engine` function from the `gsengine` package with the `knitr::knit_engines$set` function. That is, you create an R chunk that calls the `knitr::knit_engines$set` function
 
-    ```{r}
-    knitr::knit_engines$set(gs = gsengine::gs.engine())
-    ```
+````{r eval=FALSE, highlight=FALSE}
+```{r}
+knitr::knit_engines$set(gs = gsengine::gs.engine())
+```
+````
 Note that there is nothing special about the `gs` variable. All it allows you to do is tell R Markdown that the chunk should talk to Genstat in order to interpret the code. That is if you specify a chunk with
 
-    ```{gs}
-    
-    ```
+````{r eval=FALSE, highlight=FALSE}
+```{gs}
+```
+````
 then R Markdown knows to talk to the Genstat engine. We could have used the name `Genstat`, `g`, or any other valid variable name and it would work in the same way. We will use `gs` throughout this document.
 
 ## Interacting with Genstat remotely
 One of the cool things about how David Baird and Simon Urbanek wrote the Genstat Messenger client is that it allows you to have Genstat running remotely on an network contactable machine.
 You can configure the Genstat server host and port via environment variables:
-    ```{r}
-    Sys.setenv(GENSTAT_HOST = "sc389508.UoA.auckland.ac.nz")
-    Sys.setenv(GENSTAT_PORT = "8085") 
-    knitr::knit_engines$set(gs = gsengine::gs.engine())
-    ```
+````{r eval=FALSE, highlight=FALSE}
+```{r}
+Sys.setenv(GENSTAT_HOST = "sc389508.UoA.auckland.ac.nz")
+Sys.setenv(GENSTAT_PORT = "8085") 
+knitr::knit_engines$set(gs = gsengine::gs.engine())
+```
+````
 or you can specify the host and the port in the call to `gs.engine`
-    ```{r tidy=FALSE}
-    knitr::knit_engines$set(gs = gsengine::gs.engine(host = "sc389508.UoA.auckland.ac.nz", 
-                                                     port = 8085))
-    ```
+````{r eval=FALSE, highlight=FALSE}
+```{r tidy=FALSE}
+knitr::knit_engines$set(gs = gsengine::gs.engine(host = "sc389508.UoA.auckland.ac.nz", 
+                                                 port = 8085))
+```
+````
 Note that the default host is `localhost` and the default port is `8085` so we did not really need to specify the port.
 
 ## Writing Genstat chunks
 To **run Genstat code** in your R Markdown file, you need to mark your chunk as with the same name you used to set the engine for `knitr`. So we used the name `gs`, and that means we can *mark* Genstat chunks with 
 
-    ```{gs}
-    
-    ```
-
+````{r eval=FALSE, highlight=FALSE}
+```{gs}
+```
+````
 ## Doing some simple things with Genstat
 
 ### Simple `PRINT` statements
 We can ask Genstat to print something for us:
+```{r tidy=FALSE, echo=FALSE}
+knitr::knit_engines$set(gs = gsengine::gs.engine(host = "sc389508.UoA.auckland.ac.nz"))
+```
 
 ```{gs}
 PRINT 1.0
@@ -114,22 +124,27 @@ DGRAPH !(1,2,3,4,5); !(10,15,7,20,12)
 ## Echo-only Code Blocks
 
 1) If you want to display the Genstat code **without evaluating** it(eval=FALSE):
-    
-    {gs, eval=FALSE}
-  
-    Example:
-    
-    ```{gs, eval=FALSE}
-    PRINT 'This should not run.'
-    ```
 
+````{r eval=FALSE, highlight=FALSE}
+```{gs, eval=FALSE}
+```
+````
+Example:
+    
+````{r eval=FALSE, highlight=FALSE}
+```{gs, eval=FALSE}
+PRINT 'This should not run.'
+```
+````
 
 2) By default, the 'gs.engine' **does** show the Genstat commands submitted in each chunk.
 
-    To **hide Genstat code lines** in the rendered output, use the 'echo = FALSE' option in the chunk header: 
-    
-    {gs, echo=FALSE}
-  
+To **hide Genstat code lines** in the rendered output, use the 'echo = FALSE' option in the chunk header: 
+
+````{r eval=FALSE, highlight=FALSE}
+```{gs, echo=FALSE}
+```
+````
     Example:
     ```{gs, echo=FALSE}
     PRINT 'This should run.'

@@ -2,12 +2,12 @@
 % Please edit documentation in R/gs.engine.R
 \name{gs.engine}
 \alias{gs.engine}
-\alias{gsengine}
 \title{Genstat Socket Engine for knitr}
 \usage{
 gs.engine(
   host = Sys.getenv("GENSTAT_HOST", "localhost"),
-  port = as.integer(Sys.getenv("GENSTAT_PORT", "8085"))
+  port = as.integer(Sys.getenv("GENSTAT_PORT", "8085")),
+  timeout = 1L
 )
 }
 \arguments{
@@ -16,6 +16,8 @@ Defaults to `"localhost"` or the environment variable `GENSTAT_HOST`.}
 
 \item{port}{An integer specifying the port number to connect to on the Genstat server. 
 Defaults to `8085` or the environment variable `GENSTAT_PORT`.}
+
+\item{timeout}{numeric, number of seconds to wait if no response is coming.}
 }
 \value{
 A function that can be registered as a knitr engine (e.g., via `knitr::knit_engines$set(gs = gs.engine())`)
