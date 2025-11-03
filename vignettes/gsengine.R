@@ -46,6 +46,11 @@ knitr::knit_engines$set(gs = gsengine::gs.engine(host = "sc389508.UoA.auckland.a
 # ```{gs, echo=FALSE}
 # ```
 
+## ----eval=FALSE, highlight=FALSE----------------------------------------------
+# ```{gs, echo=FALSE}
+# PRINT 'This should run.'
+# ```
+
 ## -----------------------------------------------------------------------------
 sessionInfo()
 

@@ -62,6 +62,7 @@ isEmpty <- function(output){
   # combine into a single string for parsing
   html_str <- paste(output, collapse = "")
   doc <- read_html(html_str)
+  if (!inherits(doc, "xml_node")) return(TRUE)
   
   # extract all text nodes
   text_nodes <- xml_text(xml_find_all(doc, ".//text()"))
@@ -83,6 +84,8 @@ stripGenVerbatim <- function(output){
   html_str <- paste(output, collapse = "")
   doc <- read_html(html_str, options = "RECOVER")
   
+  if (!inherits(doc, "xml_node")) return(character())
+
   # Remove spans that are exactly <span class="GenVerbatim"><pre></pre></span>
   empty_spans <- xml_find_all(
     doc,
@@ -125,14 +128,14 @@ processOutput <- function(msg, io) {
     else {
         ## process one entry at a time
         as.character(unlist(lapply(msg, function(o) {
-            if (o$type == "HTML") {
+            if (o$cmd == "OUT" && o$type == "HTML") {
                 if (is.function(.GlobalEnv$processGenstatHtmlOutput))
                     .GlobalEnv$processGenstatHtmlOutput(o$content, io)
                 else
                   if(!isEmpty(o$content)){
                     stripGenVerbatim(o$content)
                   }
-            } else if (o$type == "GRAPH") {
+            } else if (o$cmd == "GRAPH") {
                 ## save graphs as files
                 if (is.null(io$graph.counter))
                     io$graph.counter <- 0L

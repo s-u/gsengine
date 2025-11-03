@@ -116,16 +116,19 @@ ANOVA [FPROB=yes; PSE=LSD] Mean_Population_m2
 ### Displaying Genstat Graphics
 Any reproducible research of course needs to be able to reproduce statistical graphics and, if you are working with Genstat, then it is highly likely you will want to be able to use Genstat's graphics system. 
 
-If Genstat outputs a **PNG image**, it will be displayed directly in the output document. These images are saved locally with filenames like 'img_1.png', 'img_2.png', etc.
+Calls to Genstat's graphing procedures result in a PNG image, which are be displayed directly in the output document. These images are saved locally with filenames like 'img_1.png', 'img_2.png', etc.
 
 Example:
 ```{gs}
 DGRAPH !(1,2,3,4,5); !(10,15,7,20,12)
 ```
 
-## Echo-only Code Blocks
+## Chunk options
+Readers who are familiar with R Markdown will be aware that chunk options can be used to control how R Markdown behaves. For example, there are options to surpress evaluation, surpress code, change plot dimensions and so on. Many of these will function in the same way for Genstat code, but some may not. We give examples of some common options here, and then provide examples of some which are specific to the `gsengine` package.
 
-1) If you want to display the Genstat code **without evaluating** it(eval=FALSE):
+### Displaying Genstat code without evaluation 
+
+If you want to display the Genstat code without evaluating---for example if you are interested in displaying the code for instructive purposes---then the `eval` chunk option works as it does with R Markdown. That is, setting `eval=FALSE` has this consequence:
 
 ````{r eval=FALSE, highlight=FALSE}
 ```{gs, eval=FALSE}
@@ -139,9 +142,10 @@ PRINT 'This should not run.'
 ```
 ````
 
-2) By default, the 'gs.engine' **does** show the Genstat commands submitted in each chunk.
 
-To **hide Genstat code lines** in the rendered output, use the 'echo = FALSE' option in the chunk header: 
+### Hiding Genstat code
+
+By default, the 'gs.engine' shows the Genstat commands submitted in each chunk. There will be times when you want to show the results of an analysis in Genstat, but do not necessarily need the reader to see the Genstat commands. To hide Genstat commands in the rendered output, we use the `echo=FALSE` option in the chunk header, in the same way we do in R Markdown: 
 
 ````{r eval=FALSE, highlight=FALSE}
 ```{gs, echo=FALSE}
@@ -156,7 +160,6 @@ PRINT 'This should run.'
 ````
 This will only include the Genstat result or tables in the final document output.
 
-This setting behaves similarly to R Markdown’s native `echo = TRUE` option for R code chunks.
 
 # Warning and Table Formatting
 The `gs.engine` will automatically:
