@@ -11,10 +11,10 @@ gs.engine(
 )
 }
 \arguments{
-\item{host}{A character string specifying the host name or IP address of the Genstat server. 
+\item{host}{A character string specifying the host name or IP address of the Genstat server.
 Defaults to `"localhost"` or the environment variable `GENSTAT_HOST`.}
 
-\item{port}{An integer specifying the port number to connect to on the Genstat server. 
+\item{port}{An integer specifying the port number to connect to on the Genstat server.
 Defaults to `8085` or the environment variable `GENSTAT_PORT`.}
 
 \item{timeout}{numeric, number of seconds to wait if no response is coming.}
@@ -23,9 +23,9 @@ Defaults to `8085` or the environment variable `GENSTAT_PORT`.}
 A function that can be registered as a knitr engine (e.g., via `knitr::knit_engines$set(gs = gs.engine())`)
 }
 \description{
-This function creates a custom knitr engine for executing Genstat code by connecting 
-to a Genstat server over a socket. The engine sends Genstat code, receives output, 
-and renders it in R Markdown documents with support for formatted tables, warnings, 
+This function creates a custom knitr engine for executing Genstat code by connecting
+to a Genstat server over a socket. The engine sends Genstat code, receives output,
+and renders it in R Markdown documents with support for formatted tables, warnings,
 and embedded plots.
 }
 \examples{
