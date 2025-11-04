@@ -4,8 +4,8 @@ author: "Yuxiao Wang, James Curran, Simon Urbanek"
 date: "`r Sys.Date()`"
 output: 
   rmarkdown::html_vignette:
-  toc: true
-  fig_caption: true
+    toc: true
+    fig_caption: true
 vignette: >
   %\VignetteIndexEntry{Using gs.engine(): Genstat Socket Engine}
   %\VignetteEngine{knitr::rmarkdown}
