@@ -17,6 +17,14 @@ img {
     max-width: 50%;  
     height: auto; 
 }
+
+/* Strip borders/striping that html_vignette adds */
+table.GenTable,
+table.GenTable th,
+table.GenTable td {
+  border: none !important;
+  background: none !important;
+}
 ```
 
 ```{r, include = FALSE}
