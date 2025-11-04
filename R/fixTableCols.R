@@ -1,8 +1,9 @@
 #' Inject per-table nth-of-type CSS from <col> alignment/widths, then remove <col>s
 #' @param output Character vector (HTML fragments) to preprocess
+#' @param io Environment which contains, among other things, a table counter which is necessary to give the tables unique ids.
 #' @return A single character string of cleaned HTML
 #' @importFrom xml2 read_html xml_find_all xml_find_first xml_children xml_attr xml_set_attr xml_add_sibling xml_remove xml_add_child xml_new_root
-fixTableCols <- function(output) {
+fixTableCols <- function(output, io) {
   html_str <- paste(output, collapse = "")
   doc <- xml2::read_html(html_str, options = "RECOVER")
   
@@ -35,7 +36,8 @@ fixTableCols <- function(output) {
       tbl_id <- xml2::xml_attr(tbl, "id")
       
       if (is.na(tbl_id) || !nzchar(tbl_id)) {
-        tbl_id <- sprintf("gs-table-%d", i)
+        io$table.counter = io$table.counter + 1
+        tbl_id <- sprintf("gs-table-%d", io$table.counter)
         xml2::xml_set_attr(tbl, "id", tbl_id)
       }
       

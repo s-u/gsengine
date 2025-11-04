@@ -7,11 +7,15 @@ processOutput <- function(msg, io) {
     ## process one entry at a time
     as.character(unlist(lapply(msg, function(o) {
       if (o$cmd == "OUT" && o$type == "HTML") {
+        if (is.null(io$table.counter)) {
+          io$table.counter <- 0L
+        }
+        
         if (is.function(.GlobalEnv$processGenstatHtmlOutput)) {
           .GlobalEnv$processGenstatHtmlOutput(o$content, io)
         } else if (!isEmpty(o$content)) {
           o$content = stripGenVerbatim(o$content)
-          fixTableCols(o$content)
+          fixTableCols(o$content, io)
         }
       } else if (o$cmd == "GRAPH") {
         ## save graphs as files

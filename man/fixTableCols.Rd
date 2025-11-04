@@ -4,10 +4,12 @@
 \alias{fixTableCols}
 \title{Inject per-table nth-of-type CSS from <col> alignment/widths, then remove <col>s}
 \usage{
-fixTableCols(output)
+fixTableCols(output, io)
 }
 \arguments{
 \item{output}{Character vector (HTML fragments) to preprocess}
+
+\item{io}{Environment which contains, among other things, a table counter which is necessary to give the tables unique ids.}
 }
 \value{
 A single character string of cleaned HTML
