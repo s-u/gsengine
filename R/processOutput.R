@@ -10,7 +10,8 @@ processOutput <- function(msg, io) {
         if (is.function(.GlobalEnv$processGenstatHtmlOutput)) {
           .GlobalEnv$processGenstatHtmlOutput(o$content, io)
         } else if (!isEmpty(o$content)) {
-          stripGenVerbatim(o$content)
+          o$content = stripGenVerbatim(o$content)
+          fixTableCols(o$content)
         }
       } else if (o$cmd == "GRAPH") {
         ## save graphs as files
