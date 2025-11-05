@@ -170,8 +170,16 @@ A lot of Genstat output is in tabular format. Equally, it is a very common in re
 - return the first $k$ tables to a list of $k$ names
 
 Here are a few examples
-
+````{r eval=FALSE, highlight=FALSE}
 ```{gs, saveTables=TRUE}
+IMPORT [PRINT=*] '%DATA%/WheatTrials.xlsx'; SHEET='Trial A1'
+TREATMENTS Cultivar
+BLOCKS Rep
+ANOVA [FPROB=yes; PSE=LSD] Mean_Population_m2
+```
+````
+
+```{gs, saveTables=TRUE, echo=FALSE}
 IMPORT [PRINT=*] '%DATA%/WheatTrials.xlsx'; SHEET='Trial A1'
 TREATMENTS Cultivar
 BLOCKS Rep
@@ -183,34 +191,98 @@ Notice that in this example there is no label for the chunk. In this situation `
 str(gs_tables_last)
 ```
 
-# Warning and Table Formatting
-The `gs.engine` will automatically:
+As you can see there are still a few unresovled issues here in that we have recovered the data, but it is not neccesarily laid out in a manner we might expect. For example, you might be able access the Mean Squares in ANOVA table using a column name of `Mean.Sq` or something similar. We will return to this problem later.
 
-1) **Highlight Genstat warnings/Faults** in red.
+We will repeat part of the last example, but using a chunk label. This is useful when you want to preserve tables from earlier chunks.
 
-2) **Format complex tables** (like factors/variates) as Markdown tables.
-
-3) **Format simple tables** (like value/rank summaries) as well-structured Markdown tables.
-
-4) **Recognize and format structural markers** in Genstat output for better readability:
-  
-    -Section breaks such as 1., 2., or 3.1 are rendered as Markdown section dividers:---
-
-    -Headings indicated by === (equal signs under a line) will be converted into bold headings.
-
-    -Subheadings indicated by --- (hyphens under a line) will be converted into italicized subheadings.
-
-    Example:
-```{gs, store_complex_tables=TRUE, store_simple_tables=TRUE}
-IMPORT '%DATA%/WheatTrials.xlsx'; SHEET='Trial A1'
+````{r eval=FALSE, highlight=FALSE}
+```{gs, label="wheat_anova", saveTables=TRUE}
+IMPORT [PRINT=*] '%DATA%/WheatTrials.xlsx'; SHEET='Trial A1'
 TREATMENTS Cultivar
 BLOCKS Rep
 ANOVA [FPROB=yes; PSE=LSD] Mean_Population_m2
-AMCOMPARISON Cultivar
-ANOVA [FPROB=yes; PSE=LSD] Yield_14%_t_ha_adj
-AMCOMPARISON Cultivar
+```
+````
+
+```{gs, label="wheat_anova", saveTables=TRUE, echo=FALSE}
+IMPORT [PRINT=*] '%DATA%/WheatTrials.xlsx'; SHEET='Trial A1'
+TREATMENTS Cultivar
+BLOCKS Rep
+ANOVA [FPROB=yes; PSE=LSD] Mean_Population_m2
 ```
 
+There is a chunk label for this chunk, `wheat_anova`. In this situation `gsengine` will return a list called `gs_tables_<label>`, or specifically in this example `gs_tables_wheat_anova`. This variable will last for all of the knitr document because you cannot duplicate chunk labels.
+
+```{r}
+gs_tables_wheat_anova[[1]]
+```
+
+There are two other variants. Firstly we can just specify the name of the list. For example if we use `saveTables="wheat_anova"` then we can refer to the results with the variable `wheat_anova`. Be warned though that this is like every other variable, and can be over-written is future chunks.
+
+````{r eval=FALSE, highlight=FALSE}
+```{gs, saveTables="wheat_anova"}
+IMPORT [PRINT=*] '%DATA%/WheatTrials.xlsx'; SHEET='Trial A1'
+TREATMENTS Cultivar
+BLOCKS Rep
+ANOVA [FPROB=yes; PSE=LSD] Mean_Population_m2
+```
+````
+
+```{gs, saveTables="wheat_anova", echo=FALSE}
+IMPORT [PRINT=*] '%DATA%/WheatTrials.xlsx'; SHEET='Trial A1'
+TREATMENTS Cultivar
+BLOCKS Rep
+ANOVA [FPROB=yes; PSE=LSD] Mean_Population_m2
+```
+
+
+```{r}
+wheat_anova[[1]]
+```
+
+If there is only a single table in the output, then the variable will not be a list of `data.frames` but rather a single data frame. For example
+
+````{r eval=FALSE, highlight=FALSE}
+```{gs, saveTables="foo"}
+VARIATE [VALUES=1,2,3] Foo
+PRINT Foo
+```
+````
+
+```{gs, saveTables="foo", echo=FALSE}
+VARIATE [VALUES=1,2,3] Foo
+PRINT Foo
+```
+
+Now we can access the variable `foo`. I.e.
+
+```{r}
+foo
+```
+
+The final mode of use is that we can provide a list/vector of table names for the results. 
+
+````{r eval=FALSE, highlight=FALSE}
+```{gs, saveTables=c("anovatbl", "meanstbl")}
+IMPORT [PRINT=*] '%DATA%/WheatTrials.xlsx'; SHEET='Trial A1'
+TREATMENTS Cultivar
+BLOCKS Rep
+ANOVA [FPROB=yes; PSE=LSD] Mean_Population_m2
+```
+````
+
+```{gs, saveTables=c("anovatbl", "meanstbl"), echo=FALSE}
+IMPORT [PRINT=*] '%DATA%/WheatTrials.xlsx'; SHEET='Trial A1'
+TREATMENTS Cultivar
+BLOCKS Rep
+ANOVA [FPROB=yes; PSE=LSD] Mean_Population_m2
+```
+
+
+```{r}
+str(anovatbl)
+str(meanstbl)
+```
 
 
 

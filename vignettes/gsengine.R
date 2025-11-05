@@ -52,3 +52,6 @@ knitr::knit_engines$set(gs = gsengine::gs.engine(host = "localhost"))
 # PRINT 'This should run.'
 # ```
 
+## -----------------------------------------------------------------------------
+str(gs_tables_last)
+
