@@ -179,7 +179,8 @@ ANOVA [FPROB=yes; PSE=LSD] Mean_Population_m2
 ```
 ````
 
-```{gs, saveTables=TRUE, echo=FALSE}
+**Note**: we will hide the results of the Genstat code here because you have seen them plenty of times so far and it is both repititious and unhelpful to display them time and time again.
+```{gs, saveTables=TRUE, echo=FALSE, results='hide'}
 IMPORT [PRINT=*] '%DATA%/WheatTrials.xlsx'; SHEET='Trial A1'
 TREATMENTS Cultivar
 BLOCKS Rep
@@ -204,7 +205,7 @@ ANOVA [FPROB=yes; PSE=LSD] Mean_Population_m2
 ```
 ````
 
-```{gs, label="wheat_anova", saveTables=TRUE, echo=FALSE}
+```{gs, label="wheat_anova", saveTables=TRUE, include=FALSE}
 IMPORT [PRINT=*] '%DATA%/WheatTrials.xlsx'; SHEET='Trial A1'
 TREATMENTS Cultivar
 BLOCKS Rep
@@ -228,7 +229,7 @@ ANOVA [FPROB=yes; PSE=LSD] Mean_Population_m2
 ```
 ````
 
-```{gs, saveTables="wheat_anova", echo=FALSE}
+```{gs, saveTables="wheat_anova", include=FALSE}
 IMPORT [PRINT=*] '%DATA%/WheatTrials.xlsx'; SHEET='Trial A1'
 TREATMENTS Cultivar
 BLOCKS Rep
@@ -249,7 +250,7 @@ PRINT Foo
 ```
 ````
 
-```{gs, saveTables="foo", echo=FALSE}
+```{gs, saveTables="foo", include=FALSE}
 VARIATE [VALUES=1,2,3] Foo
 PRINT Foo
 ```
