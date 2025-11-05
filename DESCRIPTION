@@ -10,7 +10,7 @@ Authors@R:
     )
 Description: Provides a custom knitr engine to process Genstat code via socket connection.
 Depends: R (>= 3.5.0)
-Imports: base64enc, knitr, jsonlite, xml2
+Imports: base64enc, knitr, jsonlite, rvest, xml2
 License: GPL-3
 Encoding: UTF-8
 LazyData: true

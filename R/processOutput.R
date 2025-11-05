@@ -21,6 +21,7 @@ processOutput <- function(msg, io, saveConfig = list(enabled = FALSE)) {
         if (!isEmpty(o$content)) {
           html <- stripGenVerbatim(o$content)
           html <- fixTableCols(html, io)
+          html <- reduceGenstatBreaks(html, maxBetween = 2)
         }
       }
       

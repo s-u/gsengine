@@ -49,24 +49,36 @@ gs.engine <- function(host = Sys.getenv("GENSTAT_HOST", "localhost"),
       
       ## Get the arguments for saving tables (if any) to data.frames
       saveConfig <- getSaveTablesOptions(options$saveTables, options$label)
+      includeFlag <- if (is.null(options$include)) {
+        TRUE 
+      } else {
+        isTRUE(options$include)
+      }
+      
+      piece <- character()
+      
+      if (isTRUE(options$eval)) {
+        msg <- gsio.msg(io, paste(options$code, collapse = "\n"))
+        piece <- tryCatch(
+          processOutput(msg, io, saveConfig = saveConfig),  # no change needed here
+          error = function(e) c("**ERROR while processing output**:", "```", as.character(e), "```")
+        )
+      }
+      
+      if (!isTRUE(includeFlag)) {
+        # include=FALSE: run code, but return nothing (suppress code + output)
+        return("")
+      }
       
       response <- character()
       if (isTRUE(options$echo)) {
         response <- c(response, "```gs", options$code, "```")
       }
-      ## Handle case where evaluation is disabled
-      if (isTRUE(options$eval)) {
-        ## send the command
-        msg <- gsio.msg(io, paste(options$code, collapse = "\n"))
-        
-        piece <- tryCatch(
-          processOutput(msg, io, saveConfig = saveConfig),
-          error = function(e) c("**ERROR while processing output**:", "```", as.character(e), "```")
-        )
-        
+      
+      if (!identical(options$results, "hide")) {
         response <- c(response, piece)
       }
-      
+
       paste(response, collapse = "\n")
     }
   })
