@@ -47,6 +47,9 @@ gs.engine <- function(host = Sys.getenv("GENSTAT_HOST", "localhost"),
         knitr::knit_meta_add(list(html_dependency_gsengine()))
       }
       
+      ## Get the arguments for saving tables (if any) to data.frames
+      saveConfig <- getSaveTablesOptions(options$saveTables, options$label)
+      
       response <- character()
       if (isTRUE(options$echo)) {
         response <- c(response, "```gs", options$code, "```")
@@ -55,11 +58,16 @@ gs.engine <- function(host = Sys.getenv("GENSTAT_HOST", "localhost"),
       if (isTRUE(options$eval)) {
         ## send the command
         msg <- gsio.msg(io, paste(options$code, collapse = "\n"))
-        response <- c(response, tryCatch(processOutput(msg, io),
+        
+        piece <- tryCatch(
+          processOutput(msg, io, saveConfig = saveConfig),
           error = function(e) c("**ERROR while processing output**:", "```", as.character(e), "```")
-        ))
+        )
+        
+        response <- c(response, piece)
       }
-      return(paste(response, collapse = "\n"))
+      
+      paste(response, collapse = "\n")
     }
   })
 }

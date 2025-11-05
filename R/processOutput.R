@@ -1,5 +1,6 @@
 #' implement this function to handle the GS output
-processOutput <- function(msg, io) {
+processOutput <- function(msg, io, saveConfig = list(enabled = FALSE)) {
+  
   ## custom handler for experiments
   if (is.function(.GlobalEnv$processGenstatOutput)) {
     processGenstatOutput(msg, io)
@@ -11,11 +12,20 @@ processOutput <- function(msg, io) {
           io$table.counter <- 0L
         }
         
+        html <- character()
+        
         if (is.function(.GlobalEnv$processGenstatHtmlOutput)) {
-          .GlobalEnv$processGenstatHtmlOutput(o$content, io)
+          html <- .GlobalEnv$processGenstatHtmlOutput(o$content, io)
         } else if (!isEmpty(o$content)) {
-          o$content = stripGenVerbatim(o$content)
-          fixTableCols(o$content, io)
+          html <- stripGenVerbatim(o$content)
+          html <- fixTableCols(html, io)
+          
+          if(length(html) > 0 && isTRUE(saveConfig)){
+            extractTablestoEnv(html, saveConfig)
+          }
+          
+          ## return the HTML to knitr
+          html
         }
       } else if (o$cmd == "GRAPH") {
         ## save graphs as files

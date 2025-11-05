@@ -91,7 +91,8 @@ To **run Genstat code** in your R Markdown file, you need to mark your chunk as 
 ### Simple `PRINT` statements
 We can ask Genstat to print something for us:
 ```{r tidy=FALSE, echo=FALSE}
-knitr::knit_engines$set(gs = gsengine::gs.engine(host = "sc389508.UoA.auckland.ac.nz"))
+#knitr::knit_engines$set(gs = gsengine::gs.engine(host = "sc389508.UoA.auckland.ac.nz"))
+knitr::knit_engines$set(gs = gsengine::gs.engine(host = "localhost"))
 ```
 
 ```{gs}
@@ -117,8 +118,6 @@ BLOCKS Rep
 ANOVA [FPROB=yes; PSE=LSD] Mean_Population_m2
 ```
 
-
-
 ### Displaying Genstat Graphics
 Any reproducible research of course needs to be able to reproduce statistical graphics and, if you are working with Genstat, then it is highly likely you will want to be able to use Genstat's graphics system. 
 
@@ -133,7 +132,6 @@ DGRAPH !(1,2,3,4,5); !(10,15,7,20,12)
 Readers who are familiar with R Markdown will be aware that chunk options can be used to control how R Markdown behaves. For example, there are options to surpress evaluation, surpress code, change plot dimensions and so on. Many of these will function in the same way for Genstat code, but some may not. We give examples of some common options here, and then provide examples of some which are specific to the `gsengine` package.
 
 ### Displaying Genstat code without evaluation 
-
 If you want to display the Genstat code without evaluating---for example if you are interested in displaying the code for instructive purposes---then the `eval` chunk option works as it does with R Markdown. That is, setting `eval=FALSE` has this consequence:
 
 ````{r eval=FALSE, highlight=FALSE}
@@ -148,9 +146,7 @@ PRINT 'This should not run.'
 ```
 ````
 
-
 ### Hiding Genstat code
-
 By default, the 'gs.engine' shows the Genstat commands submitted in each chunk. There will be times when you want to show the results of an analysis in Genstat, but do not necessarily need the reader to see the Genstat commands. To hide Genstat commands in the rendered output, we use the `echo=FALSE` option in the chunk header, in the same way we do in R Markdown: 
 
 ````{r eval=FALSE, highlight=FALSE}
@@ -166,6 +162,26 @@ PRINT 'This should run.'
 ````
 This will only include the Genstat result or tables in the final document output.
 
+### Saving Genstat tables for further manipulation
+A lot of Genstat output is in tabular format. Equally, it is a very common in reproducible research to want to include figures from tables. For example a sum-of-squares value or an $F$-statistic. The current implementation in `gsengine` allows for three different modes of table retrieval. The package can
+
+- automatically assign all tables to a list to a name like gs_tables_<chunklabel>
+- assign a single table (if there is only one) or a list to a given name
+- return the first $k$ tables to a list of $k$ names
+
+Here are a few examples
+
+```{gs, saveTables=TRUE}
+IMPORT [PRINT=*] '%DATA%/WheatTrials.xlsx'; SHEET='Trial A1'
+TREATMENTS Cultivar
+BLOCKS Rep
+ANOVA [FPROB=yes; PSE=LSD] Mean_Population_m2
+```
+Notice that in this example there is no label for the chunk. In this situation `gsengine` will return a list called `gs_tables_last`. This will, of course, get overwritten if you ask to save the tables in a subsequent chunk. 
+
+```{r}
+str(gs_tables_last)
+```
 
 # Warning and Table Formatting
 The `gs.engine` will automatically:

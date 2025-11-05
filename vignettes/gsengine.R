@@ -31,7 +31,8 @@ knitr::opts_chunk$set(
 # ```
 
 ## ----tidy=FALSE, echo=FALSE---------------------------------------------------
-knitr::knit_engines$set(gs = gsengine::gs.engine(host = "sc389508.UoA.auckland.ac.nz"))
+#knitr::knit_engines$set(gs = gsengine::gs.engine(host = "sc389508.UoA.auckland.ac.nz"))
+knitr::knit_engines$set(gs = gsengine::gs.engine(host = "localhost"))
 
 ## ----eval=FALSE, highlight=FALSE----------------------------------------------
 # ```{gs, eval=FALSE}
@@ -50,7 +51,4 @@ knitr::knit_engines$set(gs = gsengine::gs.engine(host = "sc389508.UoA.auckland.a
 # ```{gs, echo=FALSE}
 # PRINT 'This should run.'
 # ```
-
-## -----------------------------------------------------------------------------
-sessionInfo()
 

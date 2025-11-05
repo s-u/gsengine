@@ -1,4 +1,4 @@
-getSaveTablesOption <- function(x, chunk_label = NULL) {
+getSaveTablesOptions <- function(x, chunk_label = NULL) {
   # saveTables = FALSE / NULL -> disabled
   if (is.null(x) || identical(x, FALSE)) {
     return(list(enabled = FALSE))

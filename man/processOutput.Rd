@@ -4,7 +4,7 @@
 \alias{processOutput}
 \title{implement this function to handle the GS output}
 \usage{
-processOutput(msg, io)
+processOutput(msg, io, saveConfig = list(enabled = FALSE))
 }
 \description{
 implement this function to handle the GS output
