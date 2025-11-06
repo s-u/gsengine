@@ -55,6 +55,9 @@ gs.engine <- function(host = Sys.getenv("GENSTAT_HOST", "localhost"),
         isTRUE(options$include)
       }
       
+      # reset per-chunk buffer
+      .GlobalEnv$.gsio$chunkTables <- list()
+      
       piece <- character()
       
       if (isTRUE(options$eval)) {
@@ -63,6 +66,14 @@ gs.engine <- function(host = Sys.getenv("GENSTAT_HOST", "localhost"),
           processOutput(msg, io, saveConfig = saveConfig),  # no change needed here
           error = function(e) c("**ERROR while processing output**:", "```", as.character(e), "```")
         )
+        
+        # ---- assign once per chunk ----
+        if (isTRUE(saveConfig$enabled)) {
+          env <- resolveAssignmentEnv()
+          dfs <- .GlobalEnv$.gsio$chunkTables
+          assignTablesOnce(dfs, saveConfig, env)
+          .GlobalEnv$.gsio$chunkTables <- list()
+        }
       }
       
       if (!isTRUE(includeFlag)) {

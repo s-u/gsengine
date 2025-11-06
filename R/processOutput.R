@@ -5,6 +5,11 @@ processOutput <- function(msg, io, saveConfig = list(enabled = FALSE)) {
     return(processGenstatOutput(msg, io))
   }
   
+  ## clear space for table storage
+  if (is.null(io$chunkTables)) {
+    io$chunkTables <- list()
+  }
+  
   as.character(unlist(lapply(msg, function(o) {
     
     if (o$cmd == "OUT" && o$type == "HTML") {
@@ -27,8 +32,10 @@ processOutput <- function(msg, io, saveConfig = list(enabled = FALSE)) {
       }
       
       if (length(html) > 0 && isTRUE(saveConfig$enabled)) {
-        browser()
-        extractTablesToEnv(html, saveConfig)
+        dfs <- parseTablesFromHTML(html)           # <-- parse only
+        if (length(dfs) > 0) {
+          io$chunkTables <- c(io$chunkTables, dfs) # <-- accumulate
+        }
       }
       
       return(html)
