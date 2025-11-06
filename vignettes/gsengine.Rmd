@@ -289,8 +289,31 @@ str(meanstbl)
 Whilst we can see all the information in an ANOVA table that comes from Genstat, it might be nice to convert this into something R understands as an ANOVA table.
 
 ```{r}
-gsengine:::genstatAnovaToAnova(anovatbl)
+anovatbl = gsengine:::genstatAnovaToAnova(anovatbl)
+anovatbl
 ```
+
+This is useful for more than just pretty printing. We can actually extract elements out of it to use in our text. For example we can get get the $P$-value
+```{r}
+pval = anovatbl$'Pr(>F)'[2] ## We choose the second element, because this is where it is stored
+```
+
+And then we can embed that in our text by including
+
+````{markdown eval=FALSE, highlight=FALSE}
+`r pval`
+````
+
+in our text. For example the R Markdown sentence
+
+````{markdown eval=FALSE, highlight=FALSE}
+The *P*-value is `r pval`.
+````
+
+gets rendered into HTML as:
+
+The *P*-value is `r pval`.
+
 
 # Troubleshooting
 If you experience connection issues:
