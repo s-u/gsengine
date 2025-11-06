@@ -67,7 +67,15 @@ extractTablesToEnv <- function(htmlBlock, saveConfig) {
     attr(dfs[[i]], "gen_table_id")   <- xml2::xml_attr(node, "id")
   }
   
-  env <- knitr::knit_global()
+  resolveAssignmentEnv <- function() {
+    if (isTRUE(getOption("knitr.in.progress"))) {
+      return(knitr::knit_global())
+    } else {
+      return(globalenv())
+    }
+  }
+  
+  env <- resolveAssignmentEnv()
   
   # ---------------- modes ----------------
   
