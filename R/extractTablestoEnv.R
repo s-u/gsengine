@@ -164,28 +164,12 @@ extractTablesToEnv <- function(htmlBlock, saveConfig) {
 
 # Helper: nearest GenHeadMajor/Minor using XPath only (no sibling walking)
 .gs_nearest_gen_headers_xpath <- function(tbl_node) {
-  
-  container <- xml2::xml_find_first(
-    tbl_node,
-    "preceding-sibling::*[
-       .//span[contains(@class,'GenHeadMajor') or contains(@class,'GenHeadMinor')]
-     ][1]"
-  )
-  
-  major <- NA_character_
-  minor <- NA_character_
-  
-  if (!is.na(container)) {
-    maj_node <- xml2::xml_find_first(container, ".//span[contains(@class,'GenHeadMajor')]")
-    min_node <- xml2::xml_find_first(container, ".//span[contains(@class,'GenHeadMinor')]")
-    if (!is.na(maj_node)) {
-      major <- trimws(xml2::xml_text(maj_node))
-    }
-    if (!is.na(min_node)) {
-      minor <- trimws(xml2::xml_text(min_node))
-    }
-  }
-  
+  maj_node <- xml2::xml_find_first(tbl_node, "preceding-sibling::span[contains(@class,'GenHeadMajor')]")
+  min_node <- xml2::xml_find_first(tbl_node, "preceding-sibling::span[contains(@class,'GenHeadMinor')]")
+
+  major <- if (!is.na(maj_node)) trimws(xml2::xml_text(maj_node)) else NA
+  minor <- if (!is.na(min_node)) trimws(xml2::xml_text(min_node)) else NA
+
   return(list(major = major, minor = minor))
 }
 
