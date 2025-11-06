@@ -104,5 +104,10 @@ fixTableCols <- function(output, io) {
     out <- as.character(doc)
     out <- sub("(?is)^<!DOCTYPE[^>]*>", "", out, perl = TRUE)
   }
-  trimws(out)
+  
+  ## remove leading or trailing whitespace
+  cleanedHTML = trimws(out)
+  
+  cleanedHTML
+  
 }

@@ -102,7 +102,7 @@ extractTablesToEnv <- function(htmlBlock, saveConfig) {
   }
   
   if (identical(saveConfig$mode, "vector_map")) {
-    browser()
+    #browser()
     targets <- saveConfig$targets
     n_names <- length(targets)
     n_tables <- length(dfs)

@@ -22,6 +22,7 @@ processOutput <- function(msg, io, saveConfig = list(enabled = FALSE)) {
           html <- stripGenVerbatim(o$content)
           html <- fixTableCols(html, io)
           html <- reduceGenstatBreaks(html, maxBetween = 2)
+          html <- trimEmptyLines(html)
         }
       }
       

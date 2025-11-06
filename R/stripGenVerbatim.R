@@ -30,15 +30,15 @@ stripGenVerbatim <- function(output) {
   body_node <- xml_find_first(doc, "//body")
   if (!is.na(body_node)) {
     # Return only the serialized children of <body>
-    cleaned_html <- paste0(vapply(xml_children(body_node), as.character, ""), collapse = "")
+    cleanedHTML <- paste0(vapply(xml_children(body_node), as.character, ""), collapse = "")
   } else {
     # Fallback: use full document minus doctype
-    cleaned_html <- as.character(doc)
-    cleaned_html <- sub("(?is)^<!DOCTYPE[^>]*>", "", cleaned_html, perl = TRUE)
+    cleanedHTML <- as.character(doc)
+    cleanedHTML <- sub("(?is)^<!DOCTYPE[^>]*>", "", cleanedHTML, perl = TRUE)
   }
   
   # Trim leading/trailing whitespace
-  cleaned_html <- trimws(cleaned_html)
+  cleanedHTML <- trimws(cleanedHTML)
   
-  cleaned_html
+  cleanedHTML
 }
