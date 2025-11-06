@@ -27,6 +27,7 @@ processOutput <- function(msg, io, saveConfig = list(enabled = FALSE)) {
       }
       
       if (length(html) > 0 && isTRUE(saveConfig$enabled)) {
+        browser()
         extractTablesToEnv(html, saveConfig)
       }
       

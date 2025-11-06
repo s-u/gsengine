@@ -111,33 +111,21 @@ extractTablesToEnv <- function(htmlBlock, saveConfig) {
   
   if (identical(saveConfig$mode, "vector_map")) {
     #browser()
-    targets <- saveConfig$targets
-    n_names <- length(targets)
+    targets  <- saveConfig$targets
+    n_names  <- length(targets)
     n_tables <- length(dfs)
     
+    # Map 1:1 for as many names as there are tables (OVERWRITE if exists)
     k <- min(n_names, n_tables)
     
-    # 1:1 mapping for as many names as there are tables
     for (i in seq_len(k)) {
-      
-      nm <- targets[[i]]
+      nm  <- targets[[i]]
       val <- dfs[[i]]
-      
-      if (exists(nm, envir = env, inherits = FALSE)) {
-        cur <- get(nm, envir = env, inherits = FALSE)
-        if (is.list(cur)) {
-          assign(nm, c(cur, list(val)), envir = env)
-        } else {
-          assign(nm, list(cur, val), envir = env)
-        }
-      } else {
-        assign(nm, val, envir = env)
-      }
+      assign(nm, val, envir = env)   # <-- overwrite unconditionally
     }
     
-    # More tables than names → assign numbered defaults
+    # If there are MORE tables than names, assign numbered defaults
     if (n_tables > n_names) {
-      
       prefix <- if (!is.null(saveConfig$default_prefix) && nzchar(saveConfig$default_prefix)) {
         saveConfig$default_prefix
       } else {
@@ -145,16 +133,15 @@ extractTablesToEnv <- function(htmlBlock, saveConfig) {
       }
       
       for (j in seq.int(n_names + 1L, n_tables)) {
-        
         auto_name <- .gs_next_available_name(prefix, env)
-        val <- dfs[[j]]
-        
+        val       <- dfs[[j]]
         assign(auto_name, val, envir = env)
       }
     }
     
     return(invisible(NULL))
   }
+  
   
   # Fallback: behave like 'auto'
   target <- saveConfig$target

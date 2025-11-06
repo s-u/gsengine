@@ -289,7 +289,7 @@ str(meanstbl)
 Whilst we can see all the information in an ANOVA table that comes from Genstat, it might be nice to convert this into something R understands as an ANOVA table.
 
 ```{r}
-gsengine:::genstatAnovaToAnova(anovatbl)
+#gsengine:::genstatAnovaToAnova(anovatbl)
 ```
 
 # Troubleshooting
