@@ -38,7 +38,8 @@ processOutput <- function(msg, io, saveConfig = list(enabled = FALSE)) {
         }
       }
       
-      return(html)
+      return(if (knitr::is_latex_output()) paste0("```{=latex}\n",
+          paste(pandoc::pandoc_convert(text=html, from="html", to="latex"), collapse="\n"), "\n```\n") else html)
     }
     
     if (o$cmd == "GRAPH") {
