@@ -95,8 +95,8 @@ To **run Genstat code** in your R Markdown file, you need to mark your chunk as 
 ### Simple `PRINT` statements
 We can ask Genstat to print something for us:
 ```{r tidy=FALSE, echo=FALSE}
-knitr::knit_engines$set(gs = gsengine::gs.engine(host = "sc389508.UoA.auckland.ac.nz"))
-#knitr::knit_engines$set(gs = gsengine::gs.engine(host = "localhost"))
+#knitr::knit_engines$set(gs = gsengine::gs.engine(host = "sc389508.UoA.auckland.ac.nz"))
+knitr::knit_engines$set(gs = gsengine::gs.engine(host = "localhost"))
 ```
 
 ```{gs}
