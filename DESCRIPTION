@@ -1,7 +1,7 @@
 Package: gsengine
 Type: Package
 Title: Genstat Engine for knitr
-Version: 2.3-0
+Version: 2.3-1
 Authors@R: 
     c(
         person("Yuxiao", "Wang", role = "aut"),
